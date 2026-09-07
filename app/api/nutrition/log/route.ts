@@ -25,26 +25,38 @@ export async function POST(request: Request) {
 
     const todayStr = date || new Date().toISOString().split('T')[0];
 
+    // Ensure foodId is a valid foreign key if provided
+    let validFoodId: string | null = null;
+    if (foodId) {
+      const foodExists = await prisma.food.findUnique({
+        where: { id: foodId },
+        select: { id: true },
+      });
+      if (foodExists) {
+        validFoodId = foodExists.id;
+      }
+    }
+
     const log = await prisma.nutritionLog.create({
       data: {
         userId: session.userId,
         date: todayStr,
         mealType: mealType || 'SNACK',
-        foodId: foodId || null,
+        foodId: validFoodId,
         foodName: foodName || 'Custom Food',
         servingUnit: servingUnit || 'g',
-        quantity: parseFloat(quantity) || 100,
-        calories: Math.round(parseFloat(calories) || 0),
-        protein: Math.round(parseFloat(protein) || 0),
-        carbs: Math.round(parseFloat(carbs) || 0),
-        fat: Math.round(parseFloat(fat) || 0),
+        quantity: Math.max(0.1, parseFloat(quantity) || 100),
+        calories: Math.max(0, Math.round(parseFloat(calories) || 0)),
+        protein: Math.max(0, Math.round(parseFloat(protein) || 0)),
+        carbs: Math.max(0, Math.round(parseFloat(carbs) || 0)),
+        fat: Math.max(0, Math.round(parseFloat(fat) || 0)),
       },
     });
 
     return NextResponse.json({ success: true, log });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Add food log error:', error);
-    return NextResponse.json({ error: 'Failed to log food' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to log food' }, { status: 500 });
   }
 }
 

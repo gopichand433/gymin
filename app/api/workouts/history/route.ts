@@ -20,7 +20,19 @@ export async function GET() {
       take: 20,
     });
 
-    return NextResponse.json({ sessions });
+    const previousPerformance: Record<string, { weightKg: number; reps: number }> = {};
+    for (const s of sessions) {
+      for (const set of s.sets) {
+        if (!previousPerformance[set.exerciseId] && set.weightKg > 0) {
+          previousPerformance[set.exerciseId] = {
+            weightKg: set.weightKg,
+            reps: set.actualReps,
+          };
+        }
+      }
+    }
+
+    return NextResponse.json({ sessions, previousPerformance });
   } catch (error) {
     console.error('History API error:', error);
     return NextResponse.json({ error: 'Failed to fetch history' }, { status: 500 });

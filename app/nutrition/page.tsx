@@ -15,6 +15,7 @@ import {
   Sparkles,
   ChevronRight,
   Filter,
+  Loader2,
 } from 'lucide-react';
 
 interface MealLog {
@@ -45,6 +46,7 @@ export default function NutritionPage() {
   const [selectedUnit, setSelectedUnit] = useState('g');
   const [quantityInput, setQuantityInput] = useState<number>(100);
   const [addingFood, setAddingFood] = useState(false);
+  const [foodLogError, setFoodLogError] = useState('');
 
   useEffect(() => {
     fetchNutrition();
@@ -78,6 +80,7 @@ export default function NutritionPage() {
     setSelectedFood(null);
     setSelectedUnit('g');
     setQuantityInput(100);
+    setFoodLogError('');
     setIsModalOpen(true);
   };
 
@@ -119,6 +122,7 @@ export default function NutritionPage() {
   const handleSaveFoodLog = async () => {
     if (!selectedFood) return;
     setAddingFood(true);
+    setFoodLogError('');
 
     try {
       const res = await fetch('/api/nutrition/log', {
@@ -137,12 +141,17 @@ export default function NutritionPage() {
         }),
       });
 
-      if (res.ok) {
-        setIsModalOpen(false);
-        fetchNutrition();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to record food log');
       }
-    } catch (err) {
+
+      setIsModalOpen(false);
+      setSelectedFood(null);
+      fetchNutrition();
+    } catch (err: any) {
       console.error(err);
+      setFoodLogError(err.message || 'Error saving food log. Please try again.');
     } finally {
       setAddingFood(false);
     }
@@ -541,14 +550,30 @@ export default function NutritionPage() {
                   </div>
                 </div>
 
+                {/* Error message banner */}
+                {foodLogError && (
+                  <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/40 text-red-400 text-xs font-semibold">
+                    {foodLogError}
+                  </div>
+                )}
+
                 <button
                   type="button"
                   onClick={handleSaveFoodLog}
                   disabled={addingFood || quantityInput <= 0}
-                  className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Log {calculated.calories} kcal to {selectedMealType}</span>
+                  {addingFood ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Recording food log...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Log {calculated.calories} kcal to {selectedMealType}</span>
+                    </>
+                  )}
                 </button>
               </div>
             )}

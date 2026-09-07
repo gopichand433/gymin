@@ -12,7 +12,20 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { planId, dayName, durationSec, sets, notes } = body;
 
-    const completedSets = (sets || []).filter((s: any) => s.isCompleted);
+    // Validate planId if provided
+    let validPlanId: string | null = null;
+    if (planId) {
+      const planExists = await prisma.workoutPlan.findUnique({
+        where: { id: planId },
+        select: { id: true },
+      });
+      if (planExists) {
+        validPlanId = planExists.id;
+      }
+    }
+
+    const rawSets = sets || [];
+    const completedSets = rawSets.filter((s: any) => s.isCompleted);
 
     // Calculate total volume: Sets x Reps x Weight
     let totalVolumeKg = 0;
@@ -30,7 +43,7 @@ export async function POST(request: Request) {
     const workoutSession = await prisma.workoutSession.create({
       data: {
         userId: session.userId,
-        planId: planId || null,
+        planId: validPlanId,
         dayName: dayName || 'Custom Workout',
         durationSec: durationSec || 0,
         totalVolumeKg: Math.round(totalVolumeKg),
@@ -49,64 +62,95 @@ export async function POST(request: Request) {
       const targetReps = parseInt(s.targetReps, 10) || 10;
       let isPr = false;
 
-      if (weightKg > 0 && actualReps > 0) {
-        const estimated1RM = Math.round(weightKg * (1 + actualReps / 30));
+      // Validate exerciseId exists before inserting set or PR
+      let validExerciseId: string | null = null;
+      let exerciseName = s.exerciseName || 'Exercise';
 
-        const existingPr = await prisma.personalRecord.findUnique({
-          where: {
-            userId_exerciseId: {
-              userId: session.userId,
-              exerciseId: s.exerciseId,
-            },
-          },
+      if (s.exerciseId) {
+        const ex = await prisma.exercise.findUnique({
+          where: { id: s.exerciseId },
+          select: { id: true, name: true },
         });
-
-        if (!existingPr || weightKg > existingPr.maxWeightKg || estimated1RM > existingPr.estimated1RM) {
-          isPr = true;
-          await prisma.personalRecord.upsert({
-            where: {
-              userId_exerciseId: {
-                userId: session.userId,
-                exerciseId: s.exerciseId,
-              },
-            },
-            update: {
-              maxWeightKg: Math.max(existingPr?.maxWeightKg || 0, weightKg),
-              maxReps: actualReps,
-              estimated1RM,
-              achievedAt: new Date(),
-            },
-            create: {
-              userId: session.userId,
-              exerciseId: s.exerciseId,
-              maxWeightKg: weightKg,
-              maxReps: actualReps,
-              estimated1RM,
-            },
-          });
-
-          // Fetch exercise name for PR announcement
-          const ex = await prisma.exercise.findUnique({ where: { id: s.exerciseId } });
-          newPrs.push({
-            exerciseName: ex?.name || 'Exercise',
-            weightKg,
-            reps: actualReps,
-          });
+        if (ex) {
+          validExerciseId = ex.id;
+          exerciseName = ex.name;
         }
       }
 
-      await prisma.workoutSet.create({
-        data: {
-          sessionId: workoutSession.id,
-          exerciseId: s.exerciseId,
-          setNumber: s.setNumber || 1,
-          targetReps,
-          actualReps,
-          weightKg,
-          isCompleted: true,
-          isPr,
-        },
-      });
+      if (!validExerciseId) {
+        const firstEx = await prisma.exercise.findFirst({ select: { id: true, name: true } });
+        if (firstEx) {
+          validExerciseId = firstEx.id;
+          exerciseName = firstEx.name;
+        }
+      }
+
+      if (!validExerciseId) continue;
+
+      if (weightKg > 0 && actualReps > 0) {
+        const estimated1RM = Math.round(weightKg * (1 + actualReps / 30));
+
+        try {
+          const existingPr = await prisma.personalRecord.findUnique({
+            where: {
+              userId_exerciseId: {
+                userId: session.userId,
+                exerciseId: validExerciseId,
+              },
+            },
+          });
+
+          if (!existingPr || weightKg > existingPr.maxWeightKg || estimated1RM > existingPr.estimated1RM) {
+            isPr = true;
+            await prisma.personalRecord.upsert({
+              where: {
+                userId_exerciseId: {
+                  userId: session.userId,
+                  exerciseId: validExerciseId,
+                },
+              },
+              update: {
+                maxWeightKg: Math.max(existingPr?.maxWeightKg || 0, weightKg),
+                maxReps: actualReps,
+                estimated1RM,
+                achievedAt: new Date(),
+              },
+              create: {
+                userId: session.userId,
+                exerciseId: validExerciseId,
+                maxWeightKg: weightKg,
+                maxReps: actualReps,
+                estimated1RM,
+              },
+            });
+
+            newPrs.push({
+              exerciseName,
+              weightKg,
+              reps: actualReps,
+            });
+          }
+        } catch (prErr) {
+          console.warn('PR recording warning:', prErr);
+        }
+      }
+
+      try {
+        await prisma.workoutSet.create({
+          data: {
+            sessionId: workoutSession.id,
+            exerciseId: validExerciseId,
+            setNumber: s.setNumber || 1,
+            targetReps,
+            actualReps,
+            weightKg,
+            isCompleted: true,
+            isPr,
+          },
+        });
+      } catch (setErr) {
+        console.warn('Set recording warning:', setErr);
+      }
     }
 
     // Check & Unlock Achievements

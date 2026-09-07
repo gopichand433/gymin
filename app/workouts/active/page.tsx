@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Clock,
   Volume2,
+  Loader2,
 } from 'lucide-react';
 import ExerciseDemo from '@/components/workout/ExerciseDemo';
 import { formatTime } from '@/lib/utils';
@@ -49,6 +50,7 @@ export default function ActiveWorkoutPage() {
   const [isFinished, setIsFinished] = useState(false);
   const [workoutSummary, setWorkoutSummary] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [finishError, setFinishError] = useState('');
 
   // Load Workout Plan & Exercises
   useEffect(() => {
@@ -58,40 +60,44 @@ export default function ActiveWorkoutPage() {
         if (data?.todayDay) {
           setPlanData(data.plan);
           setTodayDay(data.todayDay);
-          setPreviousPerformance(data.previousPerformance || {});
-
-          // Initialize weight input with previous weight if available
-          const firstEx = data.todayDay.exercises[0];
-          if (firstEx && data.previousPerformance[firstEx.exerciseId]) {
-            setWeightInput(data.previousPerformance[firstEx.exerciseId].weightKg);
-            setRepsInput(data.previousPerformance[firstEx.exerciseId].reps);
+          const firstEx = data.todayDay.exercises[0]?.exercise;
+          if (firstEx && previousPerformance[firstEx.id]) {
+            setWeightInput(previousPerformance[firstEx.id].weightKg);
+            setRepsInput(previousPerformance[firstEx.id].reps);
           }
         }
       })
       .finally(() => setLoading(false));
+
+    fetch('/api/workouts/history')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.previousPerformance) {
+          setPreviousPerformance(data.previousPerformance);
+        }
+      });
   }, []);
 
-  // Workout duration counter
+  // Workout duration timer
   useEffect(() => {
-    let interval: any;
-    if (isTimerRunning && !isFinished) {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
       interval = setInterval(() => {
         setElapsedSeconds((prev) => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isTimerRunning, isFinished]);
+  }, [isTimerRunning]);
 
-  // Rest Timer Countdown
+  // Rest interval countdown timer
   useEffect(() => {
-    let timer: any;
+    let timer: NodeJS.Timeout;
     if (restTimerSeconds !== null && restTimerSeconds > 0) {
       timer = setInterval(() => {
-        setRestTimerSeconds((prev) => (prev !== null && prev > 1 ? prev - 1 : 0));
+        setRestTimerSeconds((prev) => (prev !== null && prev > 0 ? prev - 1 : null));
       }, 1000);
     } else if (restTimerSeconds === 0) {
       setRestCompleteAlert(true);
-      // Play brief web audio chime
       try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = audioCtx.createOscillator();
@@ -149,7 +155,8 @@ export default function ActiveWorkoutPage() {
       isCompleted: true,
     };
 
-    setCompletedSets((prev) => [...prev, setRecord]);
+    const nextCompletedSets = [...completedSets, setRecord];
+    setCompletedSets(nextCompletedSets);
 
     // Move to next set or next exercise
     if (currentSetNumber < totalSetsForCurrent) {
@@ -168,7 +175,7 @@ export default function ActiveWorkoutPage() {
       startRestTimer(90);
     } else {
       // Finished all exercises
-      handleFinishWorkout();
+      handleFinishWorkout(nextCompletedSets);
     }
   };
 
@@ -182,9 +189,26 @@ export default function ActiveWorkoutPage() {
     }
   };
 
-  const handleFinishWorkout = async () => {
+  const handleFinishWorkout = async (overrideSets?: any[]) => {
     setIsTimerRunning(false);
     setSaving(true);
+    setFinishError('');
+
+    // If no sets completed yet, auto-record current set so workout volume is logged
+    let setsToSubmit = overrideSets || completedSets;
+    if (setsToSubmit.length === 0 && currentExercise) {
+      setsToSubmit = [
+        {
+          exerciseId: currentExercise.id,
+          exerciseName: currentExercise.name,
+          setNumber: currentSetNumber,
+          weightKg: weightInput,
+          actualReps: repsInput,
+          targetReps: currentWorkoutExercise?.targetReps || '10',
+          isCompleted: true,
+        },
+      ];
+    }
 
     try {
       const res = await fetch('/api/workouts/complete-session', {
@@ -193,24 +217,33 @@ export default function ActiveWorkoutPage() {
         body: JSON.stringify({
           planId: planData?.id,
           dayName: todayDay?.name || 'Daily Workout',
-          durationSec: elapsedSeconds,
-          sets: completedSets,
+          durationSec: Math.max(elapsedSeconds, 60),
+          sets: setsToSubmit,
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to complete session');
+      }
+
       if (data?.summary) {
         setWorkoutSummary(data.summary);
         setIsFinished(true);
         // Trigger celebratory confetti
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
+        try {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+          });
+        } catch (e) {
+          console.warn('Confetti notification ignored:', e);
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setFinishError(err.message || 'Error finishing workout. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -237,12 +270,34 @@ export default function ActiveWorkoutPage() {
 
         <button
           type="button"
-          onClick={handleFinishWorkout}
-          className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-extrabold transition-colors shadow-md shadow-emerald-500/20"
+          onClick={() => handleFinishWorkout()}
+          disabled={saving}
+          className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-extrabold transition-colors shadow-md shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-1.5"
         >
-          Finish Workout
+          {saving ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <span>Finish Workout</span>
+          )}
         </button>
       </div>
+
+      {/* Error notification banner if any */}
+      {finishError && (
+        <div className="mt-3 p-3 rounded-2xl bg-red-500/15 border border-red-500/40 text-red-400 text-xs font-semibold flex items-center justify-between shadow-lg">
+          <span>{finishError}</span>
+          <button
+            type="button"
+            onClick={() => setFinishError('')}
+            className="p-1 rounded-lg text-slate-400 hover:text-white"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Main Exercise View */}
       <div className="flex-1 py-4 space-y-6">

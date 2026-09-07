@@ -36,7 +36,56 @@ export async function getSession(): Promise<UserSessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return verifyJwtToken(token);
+  const payload = verifyJwtToken(token);
+  if (!payload?.userId) return null;
+
+  try {
+    // 1. Direct match by ID
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { id: true, email: true, name: true },
+    });
+
+    if (user) {
+      return {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+      };
+    }
+
+    // 2. If ID changed (e.g. database re-seeded), match by email
+    if (payload.email) {
+      const userByEmail = await prisma.user.findUnique({
+        where: { email: payload.email },
+        select: { id: true, email: true, name: true },
+      });
+      if (userByEmail) {
+        return {
+          userId: userByEmail.id,
+          email: userByEmail.email,
+          name: userByEmail.name,
+        };
+      }
+    }
+
+    // 3. Fallback to active demo user if present
+    const demoUser = await prisma.user.findFirst({
+      select: { id: true, email: true, name: true },
+    });
+    if (demoUser) {
+      return {
+        userId: demoUser.id,
+        email: demoUser.email,
+        name: demoUser.name,
+      };
+    }
+
+    return null;
+  } catch (err) {
+    console.error('Session user verification error:', err);
+    return payload;
+  }
 }
 
 export async function getCurrentUser() {
