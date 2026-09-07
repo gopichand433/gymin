@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
     if (!existingPlan) {
       // Find key exercises to build the split
-      const exercises = await prisma.exercise.findMany({ take: 30 });
+      const exercises = await prisma.exercise.findMany({ take: 100 });
       const exMap = new Map(exercises.map((e) => [e.slug, e.id]));
 
       let splitName = 'Personalized 4-Day Upper/Lower Split';
@@ -123,7 +123,9 @@ export async function POST(request: Request) {
           dayOfWeek: 1,
           exercises: [
             { slug: 'barbell-bench-press', sets: 4, reps: '8-10' },
+            { slug: 'incline-dumbbell-press', sets: 4, reps: '10-12' },
             { slug: 'barbell-bent-over-row', sets: 4, reps: '8-10' },
+            { slug: 'lat-pulldown', sets: 4, reps: '10-12' },
             { slug: 'overhead-barbell-press', sets: 3, reps: '8-10' },
             { slug: 'cable-tricep-pushdown', sets: 3, reps: '12-15' },
           ],
@@ -133,8 +135,10 @@ export async function POST(request: Request) {
           dayOfWeek: 2,
           exercises: [
             { slug: 'barbell-back-squat', sets: 4, reps: '8-10' },
+            { slug: 'leg-press', sets: 4, reps: '10-12' },
             { slug: 'romanian-deadlift', sets: 3, reps: '10-12' },
-            { slug: 'leg-press', sets: 3, reps: '10-12' },
+            { slug: 'leg-extension', sets: 3, reps: '12-15' },
+            { slug: 'lying-leg-curl', sets: 3, reps: '12-15' },
             { slug: 'standing-calf-raise', sets: 4, reps: '15' },
           ],
         },
@@ -143,9 +147,11 @@ export async function POST(request: Request) {
           dayOfWeek: 4,
           exercises: [
             { slug: 'incline-dumbbell-press', sets: 4, reps: '10-12' },
-            { slug: 'lat-pulldown', sets: 4, reps: '10-12' },
+            { slug: 'pull-ups', sets: 3, reps: '8-10' },
+            { slug: 'seated-cable-row', sets: 4, reps: '10-12' },
             { slug: 'dumbbell-lateral-raise', sets: 4, reps: '12-15' },
             { slug: 'barbell-bicep-curl', sets: 3, reps: '10-12' },
+            { slug: 'skull-crushers', sets: 3, reps: '10-12' },
           ],
         },
         {
@@ -154,7 +160,9 @@ export async function POST(request: Request) {
           exercises: [
             { slug: 'conventional-deadlift', sets: 3, reps: '6-8' },
             { slug: 'bulgarian-split-squat', sets: 3, reps: '10-12' },
+            { slug: 'barbell-hip-thrust', sets: 3, reps: '10-12' },
             { slug: 'lying-leg-curl', sets: 3, reps: '12-15' },
+            { slug: 'standing-calf-raise', sets: 4, reps: '15' },
             { slug: 'plank', sets: 3, reps: '60' },
           ],
         },
@@ -171,7 +179,9 @@ export async function POST(request: Request) {
               { slug: 'barbell-back-squat', sets: 3, reps: '8-10' },
               { slug: 'barbell-bench-press', sets: 3, reps: '8-10' },
               { slug: 'barbell-bent-over-row', sets: 3, reps: '8-10' },
-              { slug: 'cable-tricep-pushdown', sets: 2, reps: '12-15' },
+              { slug: 'overhead-barbell-press', sets: 3, reps: '8-10' },
+              { slug: 'cable-tricep-pushdown', sets: 3, reps: '12-15' },
+              { slug: 'standing-calf-raise', sets: 3, reps: '15' },
             ],
           },
           {
@@ -179,9 +189,11 @@ export async function POST(request: Request) {
             dayOfWeek: 3,
             exercises: [
               { slug: 'conventional-deadlift', sets: 3, reps: '6-8' },
-              { slug: 'overhead-barbell-press', sets: 3, reps: '8-10' },
+              { slug: 'incline-dumbbell-press', sets: 3, reps: '10-12' },
               { slug: 'lat-pulldown', sets: 3, reps: '10-12' },
-              { slug: 'barbell-bicep-curl', sets: 2, reps: '10-12' },
+              { slug: 'dumbbell-lateral-raise', sets: 3, reps: '12-15' },
+              { slug: 'barbell-bicep-curl', sets: 3, reps: '10-12' },
+              { slug: 'hanging-leg-raises', sets: 3, reps: '12-15' },
             ],
           },
           {
@@ -189,9 +201,11 @@ export async function POST(request: Request) {
             dayOfWeek: 5,
             exercises: [
               { slug: 'leg-press', sets: 3, reps: '10-12' },
-              { slug: 'incline-dumbbell-press', sets: 3, reps: '10-12' },
+              { slug: 'chest-dips', sets: 3, reps: '10-12' },
               { slug: 'pull-ups', sets: 3, reps: '8-10' },
-              { slug: 'dumbbell-lateral-raise', sets: 3, reps: '12-15' },
+              { slug: 'seated-dumbbell-shoulder-press', sets: 3, reps: '10-12' },
+              { slug: 'hammer-curls', sets: 3, reps: '10-12' },
+              { slug: 'plank', sets: 3, reps: '60' },
             ],
           },
         ];
@@ -204,19 +218,23 @@ export async function POST(request: Request) {
             dayOfWeek: 1,
             exercises: [
               { slug: 'barbell-bench-press', sets: 4, reps: '8-10' },
-              { slug: 'incline-dumbbell-press', sets: 3, reps: '10-12' },
+              { slug: 'incline-dumbbell-press', sets: 4, reps: '10-12' },
               { slug: 'cable-chest-flyes', sets: 3, reps: '12-15' },
-              { slug: 'cable-tricep-pushdown', sets: 3, reps: '12-15' },
+              { slug: 'chest-dips', sets: 3, reps: '10-12' },
+              { slug: 'cable-tricep-pushdown', sets: 4, reps: '12-15' },
+              { slug: 'skull-crushers', sets: 3, reps: '10-12' },
             ],
           },
           {
             name: 'Back & Biceps',
             dayOfWeek: 2,
             exercises: [
-              { slug: 'deadlift', sets: 3, reps: '6-8' },
+              { slug: 'conventional-deadlift', sets: 4, reps: '6-8' },
               { slug: 'lat-pulldown', sets: 4, reps: '10-12' },
-              { slug: 'barbell-bent-over-row', sets: 3, reps: '8-10' },
-              { slug: 'barbell-bicep-curl', sets: 3, reps: '10-12' },
+              { slug: 'barbell-bent-over-row', sets: 4, reps: '8-10' },
+              { slug: 'seated-cable-row', sets: 3, reps: '10-12' },
+              { slug: 'barbell-bicep-curl', sets: 4, reps: '10-12' },
+              { slug: 'hammer-curls', sets: 3, reps: '12-15' },
             ],
           },
           {
@@ -224,8 +242,10 @@ export async function POST(request: Request) {
             dayOfWeek: 3,
             exercises: [
               { slug: 'barbell-back-squat', sets: 4, reps: '8-10' },
-              { slug: 'leg-press', sets: 3, reps: '10-12' },
+              { slug: 'leg-press', sets: 4, reps: '10-12' },
               { slug: 'romanian-deadlift', sets: 3, reps: '10-12' },
+              { slug: 'leg-extension', sets: 3, reps: '12-15' },
+              { slug: 'lying-leg-curl', sets: 3, reps: '12-15' },
               { slug: 'standing-calf-raise', sets: 4, reps: '15' },
             ],
           },
@@ -235,21 +255,40 @@ export async function POST(request: Request) {
             exercises: [
               { slug: 'overhead-barbell-press', sets: 4, reps: '8-10' },
               { slug: 'dumbbell-lateral-raise', sets: 4, reps: '12-15' },
+              { slug: 'seated-dumbbell-shoulder-press', sets: 3, reps: '10-12' },
               { slug: 'reverse-pec-deck-fly', sets: 3, reps: '12-15' },
-              { slug: 'barbell-shrugs', sets: 3, reps: '12-15' },
+              { slug: 'barbell-shrugs', sets: 4, reps: '12-15' },
+              { slug: 'hanging-leg-raises', sets: 3, reps: '15' },
             ],
           },
           {
             name: 'Arms & Core Focus',
             dayOfWeek: 5,
             exercises: [
-              { slug: 'hammer-curls', sets: 3, reps: '10-12' },
-              { slug: 'skull-crushers', sets: 3, reps: '10-12' },
-              { slug: 'hanging-leg-raises', sets: 3, reps: '12-15' },
+              { slug: 'preacher-curl', sets: 3, reps: '10-12' },
+              { slug: 'incline-dumbbell-curl', sets: 3, reps: '10-12' },
+              { slug: 'overhead-dumbbell-tricep-extension', sets: 3, reps: '12-15' },
+              { slug: 'diamond-push-ups', sets: 3, reps: '12-15' },
+              { slug: 'ab-wheel-rollout', sets: 3, reps: '10-12' },
               { slug: 'plank', sets: 3, reps: '60' },
             ],
           },
         ];
+
+        if (parsedDays === 6) {
+          daysConfig.push({
+            name: 'Full Lower & Posterior Chain',
+            dayOfWeek: 6,
+            exercises: [
+              { slug: 'barbell-back-squat', sets: 4, reps: '8-10' },
+              { slug: 'romanian-deadlift', sets: 4, reps: '8-10' },
+              { slug: 'bulgarian-split-squat', sets: 3, reps: '10-12' },
+              { slug: 'leg-curl', sets: 3, reps: '12-15' },
+              { slug: 'standing-calf-raise', sets: 4, reps: '15' },
+              { slug: 'hanging-leg-raises', sets: 3, reps: '15' },
+            ],
+          });
+        }
       }
 
       await prisma.workoutPlan.create({

@@ -2124,25 +2124,47 @@ async function main() {
   }
 
   // 4. Seed Standard Workout Plans & Splits
-  console.log('Seeding standard workout split plans...');
+  console.log('Seeding standard workout split plans with at least 6 exercises per day...');
   const benchPress = await prisma.exercise.findUnique({ where: { slug: 'barbell-bench-press' } });
-  const squat = await prisma.exercise.findUnique({ where: { slug: 'barbell-back-squat' } });
-  const deadlift = await prisma.exercise.findUnique({ where: { slug: 'conventional-deadlift' } });
-  const ohp = await prisma.exercise.findUnique({ where: { slug: 'overhead-barbell-press' } });
-  const row = await prisma.exercise.findUnique({ where: { slug: 'barbell-bent-over-row' } });
-  const pullup = await prisma.exercise.findUnique({ where: { slug: 'pull-ups' } });
-  const latPulldown = await prisma.exercise.findUnique({ where: { slug: 'lat-pulldown' } });
+  const inclinePress = await prisma.exercise.findUnique({ where: { slug: 'incline-dumbbell-press' } });
+  const cableFlyes = await prisma.exercise.findUnique({ where: { slug: 'cable-chest-flyes' } });
+  const dips = await prisma.exercise.findUnique({ where: { slug: 'chest-dips' } });
   const pushdown = await prisma.exercise.findUnique({ where: { slug: 'cable-tricep-pushdown' } });
+  const skullCrushers = await prisma.exercise.findUnique({ where: { slug: 'skull-crushers' } });
+
+  const deadlift = await prisma.exercise.findUnique({ where: { slug: 'conventional-deadlift' } });
+  const latPulldown = await prisma.exercise.findUnique({ where: { slug: 'lat-pulldown' } });
+  const row = await prisma.exercise.findUnique({ where: { slug: 'barbell-bent-over-row' } });
+  const cableRow = await prisma.exercise.findUnique({ where: { slug: 'seated-cable-row' } });
   const bicepCurl = await prisma.exercise.findUnique({ where: { slug: 'barbell-bicep-curl' } });
-  const lateralRaise = await prisma.exercise.findUnique({ where: { slug: 'dumbbell-lateral-raise' } });
+  const hammerCurl = await prisma.exercise.findUnique({ where: { slug: 'hammer-curls' } });
+
+  const squat = await prisma.exercise.findUnique({ where: { slug: 'barbell-back-squat' } });
   const legPress = await prisma.exercise.findUnique({ where: { slug: 'leg-press' } });
   const rdl = await prisma.exercise.findUnique({ where: { slug: 'romanian-deadlift' } });
+  const legExtension = await prisma.exercise.findUnique({ where: { slug: 'leg-extension' } });
+  const legCurl = await prisma.exercise.findUnique({ where: { slug: 'lying-leg-curl' } });
+  const calfRaise = await prisma.exercise.findUnique({ where: { slug: 'standing-calf-raise' } });
 
-  // 5-Day Split Plan
+  const ohp = await prisma.exercise.findUnique({ where: { slug: 'overhead-barbell-press' } });
+  const lateralRaise = await prisma.exercise.findUnique({ where: { slug: 'dumbbell-lateral-raise' } });
+  const seatedDbPress = await prisma.exercise.findUnique({ where: { slug: 'seated-dumbbell-shoulder-press' } });
+  const reverseFly = await prisma.exercise.findUnique({ where: { slug: 'reverse-pec-deck-fly' } });
+  const shrugs = await prisma.exercise.findUnique({ where: { slug: 'barbell-shrugs' } });
+  const legRaises = await prisma.exercise.findUnique({ where: { slug: 'hanging-leg-raises' } });
+
+  const preacherCurl = await prisma.exercise.findUnique({ where: { slug: 'preacher-curl' } });
+  const inclineDbCurl = await prisma.exercise.findUnique({ where: { slug: 'incline-dumbbell-curl' } });
+  const overheadTricep = await prisma.exercise.findUnique({ where: { slug: 'overhead-dumbbell-tricep-extension' } });
+  const diamondPushup = await prisma.exercise.findUnique({ where: { slug: 'diamond-push-ups' } });
+  const abWheel = await prisma.exercise.findUnique({ where: { slug: 'ab-wheel-rollout' } });
+  const plank = await prisma.exercise.findUnique({ where: { slug: 'plank' } });
+
+  // 5-Day Split Plan (6 Exercises Per Day)
   const split5Day = await prisma.workoutPlan.create({
     data: {
       name: 'GYMIN 5-Day Hypertrophy Split',
-      description: 'Comprehensive 5-day body part split targeting muscle growth, symmetry, and progressive overload.',
+      description: 'Comprehensive 5-day body part split targeting muscle growth, symmetry, and progressive overload with 6 dedicated movements daily.',
       splitType: '5_DAY_SPLIT',
       isCustom: false,
       isActive: true,
@@ -2155,7 +2177,11 @@ async function main() {
             exercises: {
               create: [
                 { exerciseId: benchPress?.id || '', targetSets: 4, targetReps: '8-10', targetRestSec: 90, order: 1 },
-                { exerciseId: pushdown?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 2 },
+                { exerciseId: inclinePress?.id || '', targetSets: 4, targetReps: '10-12', targetRestSec: 75, order: 2 },
+                { exerciseId: cableFlyes?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 3 },
+                { exerciseId: dips?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 4 },
+                { exerciseId: pushdown?.id || '', targetSets: 4, targetReps: '12-15', targetRestSec: 60, order: 5 },
+                { exerciseId: skullCrushers?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 6 },
               ],
             },
           },
@@ -2166,8 +2192,11 @@ async function main() {
             exercises: {
               create: [
                 { exerciseId: deadlift?.id || '', targetSets: 4, targetReps: '6-8', targetRestSec: 120, order: 1 },
-                { exerciseId: latPulldown?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 2 },
-                { exerciseId: bicepCurl?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 3 },
+                { exerciseId: latPulldown?.id || '', targetSets: 4, targetReps: '10-12', targetRestSec: 75, order: 2 },
+                { exerciseId: row?.id || '', targetSets: 4, targetReps: '8-10', targetRestSec: 90, order: 3 },
+                { exerciseId: cableRow?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 4 },
+                { exerciseId: bicepCurl?.id || '', targetSets: 4, targetReps: '10-12', targetRestSec: 60, order: 5 },
+                { exerciseId: hammerCurl?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 6 },
               ],
             },
           },
@@ -2178,30 +2207,41 @@ async function main() {
             exercises: {
               create: [
                 { exerciseId: squat?.id || '', targetSets: 4, targetReps: '8-10', targetRestSec: 120, order: 1 },
-                { exerciseId: legPress?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 90, order: 2 },
+                { exerciseId: legPress?.id || '', targetSets: 4, targetReps: '10-12', targetRestSec: 90, order: 2 },
                 { exerciseId: rdl?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 90, order: 3 },
+                { exerciseId: legExtension?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 4 },
+                { exerciseId: legCurl?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 5 },
+                { exerciseId: calfRaise?.id || '', targetSets: 4, targetReps: '15-20', targetRestSec: 45, order: 6 },
               ],
             },
           },
           {
-            name: 'Shoulders & Abs',
+            name: 'Shoulders & Traps',
             dayOfWeek: 4, // Thursday
             order: 4,
             exercises: {
               create: [
                 { exerciseId: ohp?.id || '', targetSets: 4, targetReps: '8-10', targetRestSec: 90, order: 1 },
                 { exerciseId: lateralRaise?.id || '', targetSets: 4, targetReps: '12-15', targetRestSec: 45, order: 2 },
+                { exerciseId: seatedDbPress?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 75, order: 3 },
+                { exerciseId: reverseFly?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 4 },
+                { exerciseId: shrugs?.id || '', targetSets: 4, targetReps: '12-15', targetRestSec: 60, order: 5 },
+                { exerciseId: legRaises?.id || '', targetSets: 3, targetReps: '15', targetRestSec: 45, order: 6 },
               ],
             },
           },
           {
-            name: 'Arms & Weak Points',
+            name: 'Arms & Core Focus',
             dayOfWeek: 5, // Friday
             order: 5,
             exercises: {
               create: [
-                { exerciseId: bicepCurl?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 1 },
-                { exerciseId: pushdown?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 2 },
+                { exerciseId: preacherCurl?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 1 },
+                { exerciseId: inclineDbCurl?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 2 },
+                { exerciseId: overheadTricep?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 3 },
+                { exerciseId: diamondPushup?.id || '', targetSets: 3, targetReps: '12-15', targetRestSec: 60, order: 4 },
+                { exerciseId: abWheel?.id || '', targetSets: 3, targetReps: '10-12', targetRestSec: 60, order: 5 },
+                { exerciseId: plank?.id || '', targetSets: 3, targetReps: '60s', targetRestSec: 45, order: 6 },
               ],
             },
           },
@@ -2513,7 +2553,7 @@ async function main() {
         cardType: 'WORKOUT_CARD',
         cardData: JSON.stringify({
           dayName: 'Chest & Triceps',
-          exerciseCount: 5,
+          exerciseCount: 6,
           durationMin: 55,
           targetMuscles: ['Chest', 'Triceps'],
         }),

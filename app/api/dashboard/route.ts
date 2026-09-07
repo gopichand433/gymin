@@ -88,7 +88,7 @@ export async function GET() {
       streakDays: 12,
       todayWorkout: {
         dayName: todayDay?.name || 'Chest & Triceps',
-        exerciseCount: todayDay?.exercises?.length || 5,
+        exerciseCount: todayDay?.exercises?.length || 6,
         durationMin: profile?.workoutDurationMinutes || 55,
         isCompleted: !!todayCompletedSession,
       },

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Pause, RotateCcw, Info, ShieldAlert, Sparkles } from 'lucide-react';
+import { Play, Pause, Info, ShieldAlert, Sparkles, Activity } from 'lucide-react';
+import AnatomyVisualizer, { getExerciseArchetype } from './AnatomyVisualizer';
 
 interface ExerciseDemoProps {
   exerciseName: string;
@@ -27,13 +28,16 @@ export default function ExerciseDemo({
   const [isPlaying, setIsPlaying] = useState(true);
   const [activeTab, setActiveTab] = useState<'visual' | 'instructions' | 'safety'>('visual');
 
+  const archetype = getExerciseArchetype(exerciseName, '', primaryMuscle, equipment);
+
   return (
     <div className="rounded-3xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-xl">
       {/* Header with Exercise Info */}
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_8px_rgba(239,68,68,0.25)] flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
               {primaryMuscle}
             </span>
             <span className="text-xs text-slate-400">{equipment}</span>
@@ -52,11 +56,12 @@ export default function ExerciseDemo({
         <button
           type="button"
           onClick={() => setActiveTab('visual')}
-          className={`flex-1 py-2.5 text-center transition-colors ${
-            activeTab === 'visual' ? 'text-emerald-400 border-b-2 border-emerald-400 bg-emerald-500/5' : 'text-slate-400 hover:text-slate-200'
+          className={`flex-1 py-2.5 text-center transition-colors flex items-center justify-center gap-1.5 ${
+            activeTab === 'visual' ? 'text-red-400 border-b-2 border-red-500 bg-red-500/5' : 'text-slate-400 hover:text-slate-200'
           }`}
         >
-          Demonstration
+          <Activity className="w-3.5 h-3.5" />
+          <span>Anatomy & Motion</span>
         </button>
         <button
           type="button"
@@ -81,74 +86,38 @@ export default function ExerciseDemo({
       {/* Tab Content */}
       <div className="p-4">
         {activeTab === 'visual' && (
-          <div className="relative rounded-2xl bg-[#080b12] border border-slate-800/80 p-6 flex flex-col items-center justify-center min-h-[220px] overflow-hidden">
-            {/* SVG Visual Demonstration */}
-            <div className="relative w-48 h-40 flex items-center justify-center">
-              <svg viewBox="0 0 200 160" className="w-full h-full">
-                {/* Bench or Ground Plane */}
-                <rect x="30" y="125" width="140" height="8" rx="4" fill="#1e293b" />
-                <rect x="50" y="133" width="10" height="20" rx="2" fill="#0f172a" />
-                <rect x="140" y="133" width="10" height="20" rx="2" fill="#0f172a" />
+          <div className="relative rounded-2xl bg-[#080b12] border border-slate-800/80 p-4 flex flex-col items-center justify-center overflow-hidden">
+            {/* Real Biomechanical Anatomy Demonstration with Red Targeted Muscle */}
+            <AnatomyVisualizer
+              archetype={archetype}
+              exerciseName={exerciseName}
+              primaryMuscle={primaryMuscle}
+              isPlaying={isPlaying}
+            />
 
-                {/* Animated Athlete Figure */}
-                <g className={isPlaying ? 'animate-bounce' : ''} style={{ animationDuration: '2.5s' }}>
-                  {/* Head */}
-                  <circle cx="100" cy="50" r="14" fill="#38bdf8" opacity="0.9" />
-
-                  {/* Spine / Torso */}
-                  <line x1="100" y1="64" x2="100" y2="105" stroke="#94a3b8" strokeWidth="12" strokeLinecap="round" />
-
-                  {/* Primary Active Muscle Highlight (Chest/Shoulders/Back) */}
-                  <rect x="90" y="68" width="20" height="18" rx="4" fill="#10b981" />
-
-                  {/* Arms & Barbell Motion */}
-                  <line x1="75" y1="75" x2="100" y2="75" stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" />
-                  <line x1="100" y1="75" x2="125" y2="75" stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" />
-
-                  {/* Weight / Barbell */}
-                  <line x1="50" y1="70" x2="150" y2="70" stroke="#f59e0b" strokeWidth="4" />
-                  <rect x="44" y="60" width="8" height="20" rx="2" fill="#ef4444" />
-                  <rect x="148" y="60" width="8" height="20" rx="2" fill="#ef4444" />
-
-                  {/* Motion Trajectory Indicator */}
-                  <line
-                    x1="100"
-                    y1="40"
-                    x2="100"
-                    y2="95"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                    strokeDasharray="4 4"
-                    opacity="0.6"
-                  />
-                </g>
-              </svg>
-            </div>
-
-            {/* Play / Pause Controls */}
-            <div className="mt-4 flex items-center gap-3">
+            {/* Play / Pause Controls & Action Bar */}
+            <div className="mt-4 flex items-center justify-between w-full pt-3 border-t border-slate-800/60">
               <button
                 type="button"
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-md active:scale-95"
               >
-                {isPlaying ? <Pause className="w-3.5 h-3.5 text-emerald-400" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
+                {isPlaying ? <Pause className="w-3.5 h-3.5 text-red-400" /> : <Play className="w-3.5 h-3.5 text-red-400" />}
                 <span>{isPlaying ? 'Pause Motion' : 'Play Motion'}</span>
               </button>
-            </div>
 
-            {/* Target Muscle Badges */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/25">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>Primary: {primaryMuscle}</span>
-              </div>
-              {secondaryMuscles.map((m, idx) => (
-                <div key={idx} className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400 bg-slate-800 px-2.5 py-1 rounded-lg">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                  <span>{m}</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-lg border border-red-500/30 shadow-[0_0_8px_rgba(239,68,68,0.2)]">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  <span>Target: {primaryMuscle}</span>
                 </div>
-              ))}
+                {secondaryMuscles.slice(0, 2).map((m, idx) => (
+                  <div key={idx} className="hidden sm:flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                    <span>{m}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
