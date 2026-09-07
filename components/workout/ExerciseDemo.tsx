@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Pause, Info, ShieldAlert, Sparkles, Activity } from 'lucide-react';
+import { Play, Pause, Info, ShieldAlert, Sparkles, Activity, Eye, Zap, Sun, Moon } from 'lucide-react';
 import AnatomyVisualizer, { getExerciseArchetype } from './AnatomyVisualizer';
+import { getExerciseMedia } from '@/lib/exercises/exercise-media';
 
 interface ExerciseDemoProps {
   exerciseName: string;
@@ -27,8 +28,12 @@ export default function ExerciseDemo({
 }: ExerciseDemoProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [activeTab, setActiveTab] = useState<'visual' | 'instructions' | 'safety'>('visual');
+  const [viewMode, setViewMode] = useState<'realistic' | 'vector'>('realistic');
+  const [backdrop, setBackdrop] = useState<'light' | 'dark'>('light');
+  const [imgError, setImgError] = useState(false);
 
   const archetype = getExerciseArchetype(exerciseName, '', primaryMuscle, equipment);
+  const exerciseMedia = getExerciseMedia(exerciseName);
 
   return (
     <div className="rounded-3xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-xl">
@@ -87,13 +92,113 @@ export default function ExerciseDemo({
       <div className="p-4">
         {activeTab === 'visual' && (
           <div className="relative rounded-2xl bg-[#080b12] border border-slate-800/80 p-4 flex flex-col items-center justify-center overflow-hidden">
-            {/* Real Biomechanical Anatomy Demonstration with Red Targeted Muscle */}
-            <AnatomyVisualizer
-              archetype={archetype}
-              exerciseName={exerciseName}
-              primaryMuscle={primaryMuscle}
-              isPlaying={isPlaying}
-            />
+            {/* View Mode Pill Switcher */}
+            <div className="w-full flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-[0_0_8px_#ef4444]" />
+                </span>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-red-400">
+                  Target Muscle (Red): {primaryMuscle}
+                </span>
+              </div>
+
+              {exerciseMedia && !imgError && (
+                <div className="flex items-center gap-1.5">
+                  {viewMode === 'realistic' && (
+                    <button
+                      type="button"
+                      title={backdrop === 'light' ? 'Switch to Dark Studio' : 'Switch to Medical White Studio'}
+                      onClick={() => setBackdrop(backdrop === 'light' ? 'dark' : 'light')}
+                      className="px-2 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-300 hover:text-white flex items-center gap-1 transition-colors"
+                    >
+                      {backdrop === 'light' ? (
+                        <>
+                          <Moon className="w-3 h-3 text-cyan-400" />
+                          <span className="hidden sm:inline">Dark</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sun className="w-3 h-3 text-amber-400" />
+                          <span className="hidden sm:inline">White Studio</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('realistic')}
+                      className={`px-2 py-1 rounded transition-colors flex items-center gap-1 ${
+                        viewMode === 'realistic' ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Zap className="w-3 h-3" />
+                      <span>Realistic Anatomy</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('vector')}
+                      className={`px-2 py-1 rounded transition-colors flex items-center gap-1 ${
+                        viewMode === 'vector' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>Biomechanical</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Main Visual Display */}
+            {viewMode === 'realistic' && exerciseMedia && !imgError ? (
+              <div
+                className={`relative w-full max-w-[380px] h-[250px] rounded-2xl border shadow-2xl flex items-center justify-center overflow-hidden p-2 transition-all duration-300 ${
+                  backdrop === 'light'
+                    ? 'bg-gradient-to-b from-white via-slate-50 to-slate-100 border-slate-200/80 shadow-slate-950/20'
+                    : 'bg-[#04060a] border-slate-800 shadow-slate-950/80'
+                }`}
+              >
+                {/* Background Grid Accent for Dark Mode */}
+                {backdrop === 'dark' && (
+                  <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+                )}
+
+                {/* Real Human Anatomy Exercise Animation (GymVisual) */}
+                <img
+                  src={isPlaying ? (exerciseMedia.localGif || exerciseMedia.cdnGif) : exerciseMedia.cdnImage}
+                  alt={`${exerciseName} anatomy animation`}
+                  className={`max-h-[235px] w-auto object-contain rounded-xl select-none transition-all ${
+                    backdrop === 'light'
+                      ? 'filter contrast-105'
+                      : 'filter contrast-125 brightness-105'
+                  }`}
+                  onError={() => setImgError(true)}
+                  loading="eager"
+                />
+
+                {/* Badge */}
+                <div
+                  className={`absolute bottom-2 left-2 px-2 py-0.5 rounded text-[9px] font-mono border backdrop-blur-sm ${
+                    backdrop === 'light'
+                      ? 'bg-white/80 border-slate-200 text-slate-700 shadow-sm'
+                      : 'bg-slate-900/80 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  {exerciseMedia.datasetName.toUpperCase()}
+                </div>
+              </div>
+            ) : (
+              <AnatomyVisualizer
+                archetype={archetype}
+                exerciseName={exerciseName}
+                primaryMuscle={primaryMuscle}
+                isPlaying={isPlaying}
+              />
+            )}
 
             {/* Play / Pause Controls & Action Bar */}
             <div className="mt-4 flex items-center justify-between w-full pt-3 border-t border-slate-800/60">

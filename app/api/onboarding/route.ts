@@ -283,7 +283,7 @@ export async function POST(request: Request) {
               { slug: 'barbell-back-squat', sets: 4, reps: '8-10' },
               { slug: 'romanian-deadlift', sets: 4, reps: '8-10' },
               { slug: 'bulgarian-split-squat', sets: 3, reps: '10-12' },
-              { slug: 'leg-curl', sets: 3, reps: '12-15' },
+              { slug: 'lying-leg-curl', sets: 3, reps: '12-15' },
               { slug: 'standing-calf-raise', sets: 4, reps: '15' },
               { slug: 'hanging-leg-raises', sets: 3, reps: '15' },
             ],
