@@ -19,6 +19,11 @@ node_modules/
 .env.production
 .env.development
 
+# Local databases
+*.db
+*.db-journal
+prisma/*.db
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
