@@ -103,11 +103,11 @@ export async function GET() {
         fatTarget,
       },
       steps: {
-        current: stepLog?.steps || 7450,
+        current: stepLog?.steps ?? 0,
         target: stepTarget,
       },
       water: {
-        current: 2250,
+        current: 0,
         target: waterTargetMl,
       },
       weight: {

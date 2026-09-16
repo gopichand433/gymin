@@ -24,7 +24,7 @@ export async function GET() {
     });
 
     const target = todayLog?.target || 10000;
-    const currentSteps = todayLog?.steps || 7450;
+    const currentSteps = todayLog?.steps ?? 0;
     const totalStepsLogged = history.reduce((sum, h) => sum + h.steps, 0);
     const averageSteps = history.length > 0 ? Math.round(totalStepsLogged / history.length) : currentSteps;
 

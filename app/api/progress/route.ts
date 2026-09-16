@@ -78,13 +78,24 @@ export async function GET() {
       take: 14,
     });
     const avgSteps =
-      stepLogs.length > 0 ? Math.round(stepLogs.reduce((s, l) => s + l.steps, 0) / stepLogs.length) : 8920;
+      stepLogs.length > 0 ? Math.round(stepLogs.reduce((s, l) => s + l.steps, 0) / stepLogs.length) : 0;
 
     const nutritionLogs = await prisma.nutritionLog.findMany({
       where: { userId: session.userId },
     });
-    const avgCalories = 1620;
-    const avgProtein = 105;
+    const calByDate: Record<string, number> = {};
+    const proteinByDate: Record<string, number> = {};
+    for (const n of nutritionLogs) {
+      calByDate[n.date] = (calByDate[n.date] || 0) + n.calories;
+      proteinByDate[n.date] = (proteinByDate[n.date] || 0) + n.protein;
+    }
+    const daysWithNutrition = Object.keys(calByDate).length;
+    const avgCalories = daysWithNutrition > 0
+      ? Math.round(Object.values(calByDate).reduce((s, c) => s + c, 0) / daysWithNutrition)
+      : 0;
+    const avgProtein = daysWithNutrition > 0
+      ? Math.round(Object.values(proteinByDate).reduce((s, p) => s + p, 0) / daysWithNutrition)
+      : 0;
 
     return NextResponse.json({
       weightLogs,

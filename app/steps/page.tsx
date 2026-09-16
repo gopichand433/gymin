@@ -27,7 +27,7 @@ export default function StepsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [stepInput, setStepInput] = useState<number>(8000);
+  const [stepInput, setStepInput] = useState<number>(0);
   const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function StepsPage() {
       const res = await fetch('/api/steps');
       const json = await res.json();
       setData(json);
-      if (json.todaySteps) setStepInput(json.todaySteps);
+      if (json.todaySteps !== undefined) setStepInput(json.todaySteps);
     } catch (err) {
       console.error(err);
     } finally {
@@ -63,9 +63,9 @@ export default function StepsPage() {
     }
   };
 
-  const todaySteps = data?.todaySteps || 7842;
+  const todaySteps = data?.todaySteps ?? 0;
   const target = data?.target || 10000;
-  const averageSteps = data?.averageSteps || 8920;
+  const averageSteps = data?.averageSteps ?? 0;
   const percent = Math.min(100, Math.round((todaySteps / target) * 100));
 
   // Format history for chart

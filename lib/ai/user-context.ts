@@ -142,7 +142,7 @@ export async function getUserFitnessContext(userId: string): Promise<UserFitness
     todayExercises,
     recentWorkoutsCompleted: recentSessions.length,
 
-    todaySteps: stepLog?.steps || 7450,
+    todaySteps: stepLog?.steps ?? 0,
     stepTarget: profile?.stepTarget || 10000,
     streakDays: 12, // consistent streak
 

@@ -2361,7 +2361,7 @@ async function main() {
       data: {
         userId: demoUser.id,
         date: dateStr,
-        steps: stepCounts[13 - i] || 8500,
+        steps: i === 0 ? 0 : (stepCounts[13 - i] || 8500),
         target: 10000,
       },
     });
@@ -2376,9 +2376,11 @@ async function main() {
     });
   }
 
-  // Add Today's Nutrition Logs matching the prompt specification (1,620 / 2,200 kcal & 105 / 140 g protein)
-  console.log("Adding today's nutrition logs...");
-  const todayStr = today.toISOString().split('T')[0];
+  // Add Yesterday's Nutrition Logs for history (today starts completely fresh at 0 calories)
+  console.log("Adding yesterday's nutrition logs for history...");
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
   const oats = await prisma.food.findFirst({ where: { name: { contains: 'Oats' } } });
   const chicken = await prisma.food.findFirst({ where: { name: { contains: 'Chicken Breast' } } });
   const rice = await prisma.food.findFirst({ where: { name: { contains: 'White Basmati Rice' } } });
@@ -2390,7 +2392,7 @@ async function main() {
   await prisma.nutritionLog.create({
     data: {
       userId: demoUser.id,
-      date: todayStr,
+      date: yesterdayStr,
       mealType: 'BREAKFAST',
       foodId: oats?.id,
       foodName: 'Rolled Oats with Milk',
@@ -2405,7 +2407,7 @@ async function main() {
   await prisma.nutritionLog.create({
     data: {
       userId: demoUser.id,
-      date: todayStr,
+      date: yesterdayStr,
       mealType: 'BREAKFAST',
       foodId: eggs?.id,
       foodName: 'Boiled Eggs (2 pcs)',
@@ -2422,7 +2424,7 @@ async function main() {
   await prisma.nutritionLog.create({
     data: {
       userId: demoUser.id,
-      date: todayStr,
+      date: yesterdayStr,
       mealType: 'LUNCH',
       foodId: chicken?.id,
       foodName: 'Grilled Chicken Breast',
@@ -2437,7 +2439,7 @@ async function main() {
   await prisma.nutritionLog.create({
     data: {
       userId: demoUser.id,
-      date: todayStr,
+      date: yesterdayStr,
       mealType: 'LUNCH',
       foodId: rice?.id,
       foodName: 'Basmati Rice',
@@ -2452,7 +2454,7 @@ async function main() {
   await prisma.nutritionLog.create({
     data: {
       userId: demoUser.id,
-      date: todayStr,
+      date: yesterdayStr,
       mealType: 'LUNCH',
       foodId: dal?.id,
       foodName: 'Dal Tadka',
@@ -2469,7 +2471,7 @@ async function main() {
   await prisma.nutritionLog.create({
     data: {
       userId: demoUser.id,
-      date: todayStr,
+      date: yesterdayStr,
       mealType: 'SNACK',
       foodName: 'Greek Yogurt with Honey & Almonds',
       servingUnit: 'serving',

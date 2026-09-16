@@ -203,11 +203,11 @@ export default function AIChatDrawer() {
                           Today's Fuel
                         </span>
                         <span className="text-slate-400 text-[11px]">
-                          {msg.cardData?.calories || 1620} / {msg.cardData?.targetCalories || 2200} kcal
+                          {msg.cardData?.calories ?? 0} / {msg.cardData?.targetCalories || 2200} kcal
                         </span>
                       </div>
                       <div className="text-xs text-slate-300">
-                        Protein: <strong className="text-white">{msg.cardData?.protein || 105}g</strong> / {msg.cardData?.targetProtein || 140}g
+                        Protein: <strong className="text-white">{msg.cardData?.protein ?? 0}g</strong> / {msg.cardData?.targetProtein || 140}g
                       </div>
                       <Link
                         href="/nutrition"

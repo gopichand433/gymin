@@ -24,14 +24,14 @@ import { getGreeting } from '@/lib/utils';
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [waterMl, setWaterMl] = useState(2250);
+  const [waterMl, setWaterMl] = useState(0);
 
   useEffect(() => {
     fetch('/api/dashboard')
       .then((res) => res.json())
       .then((json) => {
         setData(json);
-        if (json?.water?.current) setWaterMl(json.water.current);
+        if (json?.water?.current !== undefined) setWaterMl(json.water.current);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -49,16 +49,16 @@ export default function DashboardPage() {
     isCompleted: false,
   };
   const nutrition = data?.nutrition || {
-    calories: 1620,
+    calories: 0,
     calorieTarget: 2200,
-    protein: 105,
+    protein: 0,
     proteinTarget: 140,
-    carbs: 160,
+    carbs: 0,
     carbsTarget: 250,
-    fat: 45,
+    fat: 0,
     fatTarget: 70,
   };
-  const steps = data?.steps || { current: 7450, target: 10000 };
+  const steps = data?.steps || { current: 0, target: 10000 };
   const weight = data?.weight || { current: 76.5, change: -1.7 };
 
   return (

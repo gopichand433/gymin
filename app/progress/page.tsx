@@ -108,7 +108,7 @@ export default function ProgressPage() {
               <span>Avg Daily Steps</span>
               <TrendingUp className="w-4 h-4 text-cyan-400" />
             </div>
-            <div className="text-2xl font-black text-white">{(stats.avgSteps || 8920).toLocaleString()}</div>
+            <div className="text-2xl font-black text-white">{(stats.avgSteps ?? 0).toLocaleString()}</div>
             <span className="text-[10px] text-cyan-400 font-bold">Active Movement</span>
           </div>
 

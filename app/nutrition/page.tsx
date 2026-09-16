@@ -176,7 +176,7 @@ export default function NutritionPage() {
     return matchesCategory && matchesSearch;
   });
 
-  const consumed = nutritionData?.consumed || { calories: 1620, protein: 105, carbs: 160, fat: 45 };
+  const consumed = nutritionData?.consumed || { calories: 0, protein: 0, carbs: 0, fat: 0 };
   const targets = nutritionData?.targets || { calories: 2200, protein: 140, carbs: 250, fat: 70 };
   const meals = nutritionData?.meals || {};
 
