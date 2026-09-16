@@ -14,16 +14,21 @@ import {
   Trophy,
   History,
   Layers,
+  CheckCircle2,
+  Lock,
 } from 'lucide-react';
 import { formatTime, formatDate } from '@/lib/utils';
+import MidnightCountdown from '@/components/workout/MidnightCountdown';
 
 export default function WorkoutsPage() {
   const [plan, setPlan] = useState<any>(null);
   const [todayDay, setTodayDay] = useState<any>(null);
+  const [nextDay, setNextDay] = useState<any>(null);
+  const [isCompletedToday, setIsCompletedToday] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchWorkoutData = () => {
     Promise.all([
       fetch('/api/workouts/active-plan').then((res) => res.json()),
       fetch('/api/workouts/history').then((res) => res.json()),
@@ -32,12 +37,18 @@ export default function WorkoutsPage() {
         if (planData?.plan) {
           setPlan(planData.plan);
           setTodayDay(planData.todayDay);
+          setNextDay(planData.nextDay);
+          setIsCompletedToday(!!planData.isCompletedToday);
         }
         if (historyData?.sessions) {
           setHistory(historyData.sessions);
         }
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchWorkoutData();
   }, []);
 
   return (
@@ -57,7 +68,7 @@ export default function WorkoutsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/workouts/builder"
               className="px-4 py-2.5 rounded-xl border border-neutral-700 hover:border-amber-400/50 text-xs font-bold text-white transition-colors flex items-center gap-1.5"
@@ -65,15 +76,28 @@ export default function WorkoutsPage() {
               <Plus className="w-3.5 h-3.5 text-amber-400" />
               <span>Customize Split</span>
             </Link>
-            <Link
-              href="/workouts/active"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-extrabold transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2"
-            >
-              <Play className="w-3.5 h-3.5 fill-black" />
-              <span>Start Today's Session</span>
-            </Link>
+            {isCompletedToday ? (
+              <MidnightCountdown variant="compact" nextWorkout={nextDay} />
+            ) : (
+              <Link
+                href="/workouts/active"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-extrabold transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2"
+              >
+                <Play className="w-3.5 h-3.5 fill-black" />
+                <span>Start Today's Session</span>
+              </Link>
+            )}
           </div>
         </div>
+
+        {/* If workout completed today, show Midnight Countdown Card */}
+        {isCompletedToday && (
+          <MidnightCountdown
+            variant="card"
+            nextWorkout={nextDay}
+            onUnlock={() => fetchWorkoutData()}
+          />
+        )}
 
         {/* Active Split Summary Banner */}
         {plan && (
@@ -135,8 +159,21 @@ export default function WorkoutsPage() {
                       Day {idx + 1}
                     </span>
                     {isToday && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-400 to-yellow-500 text-black">
-                        Today's Split
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
+                          isCompletedToday
+                            ? 'bg-amber-400/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-black'
+                        }`}
+                      >
+                        {isCompletedToday ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-amber-400" />
+                            <span>Finished Today</span>
+                          </>
+                        ) : (
+                          "Today's Split"
+                        )}
                       </span>
                     )}
                   </div>
@@ -159,13 +196,22 @@ export default function WorkoutsPage() {
                   </div>
 
                   {isToday && (
-                    <Link
-                      href="/workouts/active"
-                      className="w-full mt-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-extrabold flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-amber-500/20"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-black" />
-                      <span>Start Workout</span>
-                    </Link>
+                    isCompletedToday ? (
+                      <div className="mt-4">
+                        <MidnightCountdown
+                          variant="button"
+                          onUnlock={() => fetchWorkoutData()}
+                        />
+                      </div>
+                    ) : (
+                      <Link
+                        href="/workouts/active"
+                        className="w-full mt-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-extrabold flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-amber-500/20"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-black" />
+                        <span>Start Workout</span>
+                      </Link>
+                    )
                   )}
                 </div>
               );

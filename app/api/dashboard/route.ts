@@ -86,6 +86,9 @@ export async function GET() {
     // 7. Dynamic unbroken streak calculation
     const streakDays = await calculateUserStreak(session.userId);
 
+    const tomorrowDayOfWeek = dayOfWeek === 7 ? 1 : dayOfWeek + 1;
+    const nextDay = activePlan?.days.find((d) => d.dayOfWeek === tomorrowDayOfWeek) || activePlan?.days[1] || activePlan?.days[0];
+
     return NextResponse.json({
       userName: user?.name || 'Athlete',
       streakDays,
@@ -94,7 +97,13 @@ export async function GET() {
         exerciseCount: todayDay?.exercises?.length || 6,
         durationMin: profile?.workoutDurationMinutes || 55,
         isCompleted: !!todayCompletedSession,
+        completedAt: todayCompletedSession?.createdAt || null,
+        completedSessionId: todayCompletedSession?.id || null,
       },
+      nextWorkout: nextDay ? {
+        dayName: nextDay.name,
+        exerciseCount: nextDay.exercises?.length || 6,
+      } : null,
       nutrition: {
         calories: consumedCalories,
         calorieTarget,

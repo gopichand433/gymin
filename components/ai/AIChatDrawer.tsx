@@ -16,6 +16,7 @@ import {
   KeyRound,
   Globe,
   Check,
+  CheckCircle2,
   ExternalLink,
 } from 'lucide-react';
 
@@ -399,14 +400,21 @@ export default function AIChatDrawer() {
                       <div className="font-extrabold text-sm text-white">
                         {msg.cardData?.dayName || 'Chest & Triceps'}
                       </div>
-                      <Link
-                        href="/workouts"
-                        onClick={() => setIsOpen(false)}
-                        className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-amber-500/20"
-                      >
-                        <Dumbbell className="w-3.5 h-3.5" />
-                        <span>Start Workout</span>
-                      </Link>
+                      {msg.cardData?.isCompleted ? (
+                        <div className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 shadow-inner">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Finished Today (Next at 12 AM)</span>
+                        </div>
+                      ) : (
+                        <Link
+                          href="/workouts"
+                          onClick={() => setIsOpen(false)}
+                          className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-amber-500/20"
+                        >
+                          <Dumbbell className="w-3.5 h-3.5" />
+                          <span>Start Workout</span>
+                        </Link>
+                      )}
                     </div>
                   )}
 

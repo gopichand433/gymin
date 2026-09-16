@@ -18,8 +18,10 @@ import {
   ArrowRight,
   CheckCircle2,
   Trophy,
+  Lock,
 } from 'lucide-react';
 import { getGreeting } from '@/lib/utils';
+import MidnightCountdown from '@/components/workout/MidnightCountdown';
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -48,6 +50,7 @@ export default function DashboardPage() {
     durationMin: 55,
     isCompleted: false,
   };
+  const nextWorkout = data?.nextWorkout;
   const nutrition = data?.nutrition || {
     calories: 0,
     calorieTarget: 2200,
@@ -101,13 +104,26 @@ export default function DashboardPage() {
             Quick Actions
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-            <Link
-              href="/workouts/active"
-              className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-500 text-black font-extrabold text-xs shadow-lg shadow-amber-500/25 hover:scale-[1.02] transition-transform flex flex-col items-center justify-center gap-2 text-center"
-            >
-              <Dumbbell className="w-5 h-5 text-black" />
-              <span>Start Workout</span>
-            </Link>
+            {workout.isCompleted ? (
+              <Link
+                href="/workouts"
+                className="p-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 text-amber-300 font-bold text-xs transition-all flex flex-col items-center justify-center gap-2 text-center"
+              >
+                <div className="relative">
+                  <Dumbbell className="w-5 h-5 text-amber-400" />
+                  <Lock className="w-2.5 h-2.5 text-yellow-400 absolute -top-1 -right-1" />
+                </div>
+                <span className="text-[11px] leading-tight">Next at 12 AM</span>
+              </Link>
+            ) : (
+              <Link
+                href="/workouts/active"
+                className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-500 text-black font-extrabold text-xs shadow-lg shadow-amber-500/25 hover:scale-[1.02] transition-transform flex flex-col items-center justify-center gap-2 text-center"
+              >
+                <Dumbbell className="w-5 h-5 text-black" />
+                <span>Start Workout</span>
+              </Link>
+            )}
 
             <Link
               href="/nutrition"
@@ -164,25 +180,63 @@ export default function DashboardPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
                   Today's Workout
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-400">
-                  Scheduled
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    workout.isCompleted
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-500/30 flex items-center gap-1'
+                      : 'bg-amber-400/20 text-amber-400'
+                  }`}
+                >
+                  {workout.isCompleted ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 text-amber-400" />
+                      <span>Completed Today</span>
+                    </>
+                  ) : (
+                    'Scheduled'
+                  )}
                 </span>
               </div>
               <h3 className="text-2xl font-black text-white mt-2">
                 {workout.dayName}
               </h3>
               <p className="text-xs text-neutral-400 mt-1">
-                {workout.exerciseCount} exercises · ~{workout.durationMin} min
+                {workout.isCompleted
+                  ? 'All sets recorded! Recovery mode active until midnight.'
+                  : `${workout.exerciseCount} exercises · ~${workout.durationMin} min`}
               </p>
             </div>
 
-            <Link
-              href="/workouts/active"
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all transform hover:scale-[1.01]"
-            >
-              <Play className="w-4 h-4 fill-black" />
-              <span>Start Workout</span>
-            </Link>
+            {workout.isCompleted ? (
+              <div className="space-y-3">
+                <MidnightCountdown variant="compact" nextWorkout={nextWorkout} />
+                <MidnightCountdown
+                  variant="button"
+                  onUnlock={() => {
+                    fetch('/api/dashboard')
+                      .then((r) => r.json())
+                      .then((j) => setData(j));
+                  }}
+                />
+                <div className="text-center pt-1">
+                  <Link
+                    href="/workouts"
+                    className="text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors inline-flex items-center gap-1"
+                  >
+                    <span>View Today's Log & Tomorrow's Routine</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href="/workouts/active"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all transform hover:scale-[1.01]"
+              >
+                <Play className="w-4 h-4 fill-black" />
+                <span>Start Workout</span>
+              </Link>
+            )}
           </div>
 
           {/* Card 2: Calories & Macro Fuel */}

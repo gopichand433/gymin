@@ -192,6 +192,9 @@ export async function POST(request: Request) {
       }
     }
 
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+
     return NextResponse.json({
       success: true,
       sessionId: workoutSession.id,
@@ -202,6 +205,8 @@ export async function POST(request: Request) {
         totalSets: completedSets.length,
         caloriesBurned: estimatedCaloriesBurned,
         newPrs,
+        isLockedUntilMidnight: true,
+        nextWorkoutUnlockAt: midnight.toISOString(),
       },
     });
   } catch (error) {

@@ -69,9 +69,27 @@ export async function GET() {
       }
     }
 
+    // Check if today's workout has already been completed
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayCompletedSession = await prisma.workoutSession.findFirst({
+      where: {
+        userId: session.userId,
+        createdAt: { gte: startOfToday },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const tomorrowDayOfWeek = dayOfWeek === 7 ? 1 : dayOfWeek + 1;
+    const nextDay = plan?.days.find((d) => d.dayOfWeek === tomorrowDayOfWeek) || plan?.days[1] || plan?.days[0];
+
     return NextResponse.json({
       plan,
       todayDay,
+      nextDay,
+      isCompletedToday: !!todayCompletedSession,
+      completedAt: todayCompletedSession?.createdAt || null,
+      completedSession: todayCompletedSession || null,
       previousPerformance: previousPerformanceMap,
     });
   } catch (error) {

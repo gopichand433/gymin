@@ -19,8 +19,12 @@ import {
   Clock,
   Volume2,
   Loader2,
+  Lock,
+  ShieldCheck,
+  Moon,
 } from 'lucide-react';
 import ExerciseDemo from '@/components/workout/ExerciseDemo';
+import MidnightCountdown from '@/components/workout/MidnightCountdown';
 import { formatTime } from '@/lib/utils';
 
 export default function ActiveWorkoutPage() {
@@ -28,6 +32,9 @@ export default function ActiveWorkoutPage() {
   const [loading, setLoading] = useState(true);
   const [planData, setPlanData] = useState<any>(null);
   const [todayDay, setTodayDay] = useState<any>(null);
+  const [nextDay, setNextDay] = useState<any>(null);
+  const [isCompletedToday, setIsCompletedToday] = useState(false);
+  const [overrideLock, setOverrideLock] = useState(false);
   const [previousPerformance, setPreviousPerformance] = useState<Record<string, any>>({});
 
   // Active workout state
@@ -60,6 +67,8 @@ export default function ActiveWorkoutPage() {
         if (data?.todayDay) {
           setPlanData(data.plan);
           setTodayDay(data.todayDay);
+          if (data?.nextDay) setNextDay(data.nextDay);
+          if (data?.isCompletedToday) setIsCompletedToday(true);
           const firstEx = data.todayDay.exercises[0]?.exercise;
           if (firstEx && previousPerformance[firstEx.id]) {
             setWeightInput(previousPerformance[firstEx.id].weightKg);
@@ -248,6 +257,89 @@ export default function ActiveWorkoutPage() {
       setSaving(false);
     }
   };
+
+  // If user completed today's workout, display the Rest & Recovery Lockout Screen until midnight
+  if (isCompletedToday && !overrideLock && !isFinished) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-neutral-100 flex flex-col justify-between max-w-3xl mx-auto px-4 py-6 sm:py-10">
+        <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Dashboard</span>
+          </button>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+            <span>Recovery Lock Active</span>
+          </span>
+        </div>
+
+        <div className="my-auto py-8 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 rounded-3xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto shadow-xl shadow-amber-500/10">
+              <Moon className="w-8 h-8 text-amber-400" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">
+              Today's Workout Already Completed! 🏆
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-400 max-w-md mx-auto">
+              You've already crushed today's training. To prevent overtraining and maximize progressive hypertrophy, your next session unlocks at 12:00 AM Midnight.
+            </p>
+          </div>
+
+          <MidnightCountdown
+            variant="card"
+            nextWorkout={nextDay}
+            onUnlock={() => setIsCompletedToday(false)}
+          />
+
+          <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-xs text-neutral-400 space-y-2">
+            <div className="font-bold text-white flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Exercise Science: Why the Midnight Recovery Window Matters</span>
+            </div>
+            <p className="leading-relaxed">
+              Muscles do not grow in the gym — they tear. They repair, adapt, and hypertrophy during the subsequent recovery and sleep cycles when muscle protein synthesis peaks. Starting tomorrow's split too early increases axial fatigue and diminishes gains.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 text-black font-extrabold text-xs transition-all shadow-lg shadow-amber-500/25 text-center"
+            >
+              Return to Dashboard
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/workouts')}
+              className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/50 text-white font-bold text-xs transition-all text-center"
+            >
+              Review Splits & History
+            </button>
+          </div>
+
+          <div className="text-center pt-2">
+            <button
+              type="button"
+              onClick={() => setOverrideLock(true)}
+              className="text-[11px] text-neutral-500 hover:text-amber-400 underline transition-colors"
+            >
+              Need to log an extra or delayed workout anyway? [Unlock Override Session]
+            </button>
+          </div>
+        </div>
+
+        <div className="text-center text-[11px] text-neutral-600 border-t border-neutral-900 pt-4">
+          GYMIN Science-Based Hypertrophy & Recovery Engine
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-neutral-100 flex flex-col justify-between max-w-4xl mx-auto px-4 py-4 sm:py-6">
@@ -552,6 +644,9 @@ export default function ActiveWorkoutPage() {
                 </div>
               </div>
             </div>
+
+            {/* Midnight Countdown Notification for Next Workout */}
+            <MidnightCountdown variant="compact" nextWorkout={nextDay} />
 
             <button
               type="button"
