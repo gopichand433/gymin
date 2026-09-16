@@ -1,4 +1,4 @@
-﻿import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'All-in-one personal fitness, workout splits, nutrition tracking, and AI assistant.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#080a0f',
-    theme_color: '#10b981',
+    background_color: '#050505',
+    theme_color: '#f59e0b',
     icons: [
       {
         src: '/favicon.ico',

@@ -186,13 +186,13 @@ export default function NutritionPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
               Daily Nutrition & Macro Tracker
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-0.5">
               Today's Nutrition
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-neutral-400 mt-1">
               Track calories, macros, and authentic Indian dishes with dynamic serving conversions
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function NutritionPage() {
           <button
             type="button"
             onClick={() => openLogModal('LUNCH')}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black text-xs font-extrabold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 text-black text-xs font-extrabold flex items-center gap-2 shadow-lg shadow-amber-500/25 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Log Food Item</span>
@@ -210,96 +210,96 @@ export default function NutritionPage() {
         {/* Nutritional Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Main Calorie Ring Card */}
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Calories</span>
-              <Flame className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Calories</span>
+              <Flame className="w-4 h-4 text-amber-400" />
             </div>
             <div>
               <div className="text-3xl font-black text-white">
                 {consumed.calories.toLocaleString()}{' '}
-                <span className="text-sm font-semibold text-slate-400">
+                <span className="text-sm font-semibold text-neutral-400">
                   / {targets.calories.toLocaleString()} kcal
                 </span>
               </div>
-              <p className="text-xs text-emerald-400 font-bold mt-1">
+              <p className="text-xs text-amber-400 font-bold mt-1">
                 {Math.max(0, targets.calories - consumed.calories)} kcal remaining
               </p>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all"
+                className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full transition-all"
                 style={{ width: `${Math.min(100, (consumed.calories / targets.calories) * 100)}%` }}
               />
             </div>
           </div>
 
           {/* Protein Card */}
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Protein</span>
-              <span className="text-xs font-bold text-emerald-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Protein</span>
+              <span className="text-xs font-bold text-amber-400">
                 {Math.round((consumed.protein / targets.protein) * 100)}%
               </span>
             </div>
             <div>
               <div className="text-2xl font-black text-white">
                 {consumed.protein}{' '}
-                <span className="text-xs font-semibold text-slate-400">/ {targets.protein} g</span>
+                <span className="text-xs font-semibold text-neutral-400">/ {targets.protein} g</span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-neutral-400 mt-1">
                 {Math.max(0, targets.protein - consumed.protein)} g to hit target
               </p>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
               <div
-                className="h-full bg-emerald-400 rounded-full transition-all"
+                className="h-full bg-amber-400 rounded-full transition-all"
                 style={{ width: `${Math.min(100, (consumed.protein / targets.protein) * 100)}%` }}
               />
             </div>
           </div>
 
           {/* Carbs Card */}
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Carbohydrates</span>
-              <span className="text-xs font-bold text-cyan-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Carbohydrates</span>
+              <span className="text-xs font-bold text-amber-300">
                 {Math.round((consumed.carbs / targets.carbs) * 100)}%
               </span>
             </div>
             <div>
               <div className="text-2xl font-black text-white">
                 {consumed.carbs}{' '}
-                <span className="text-xs font-semibold text-slate-400">/ {targets.carbs} g</span>
+                <span className="text-xs font-semibold text-neutral-400">/ {targets.carbs} g</span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">Clean energy fuel</p>
+              <p className="text-xs text-neutral-400 mt-1">Clean energy fuel</p>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
               <div
-                className="h-full bg-cyan-400 rounded-full transition-all"
+                className="h-full bg-amber-300 rounded-full transition-all"
                 style={{ width: `${Math.min(100, (consumed.carbs / targets.carbs) * 100)}%` }}
               />
             </div>
           </div>
 
           {/* Fat Card */}
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Fats</span>
-              <span className="text-xs font-bold text-amber-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Fats</span>
+              <span className="text-xs font-bold text-yellow-400">
                 {Math.round((consumed.fat / targets.fat) * 100)}%
               </span>
             </div>
             <div>
               <div className="text-2xl font-black text-white">
                 {consumed.fat}{' '}
-                <span className="text-xs font-semibold text-slate-400">/ {targets.fat} g</span>
+                <span className="text-xs font-semibold text-neutral-400">/ {targets.fat} g</span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">Hormonal & joint support</p>
+              <p className="text-xs text-neutral-400 mt-1">Hormonal & joint support</p>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
               <div
-                className="h-full bg-amber-400 rounded-full transition-all"
+                className="h-full bg-yellow-400 rounded-full transition-all"
                 style={{ width: `${Math.min(100, (consumed.fat / targets.fat) * 100)}%` }}
               />
             </div>
@@ -307,8 +307,8 @@ export default function NutritionPage() {
         </div>
 
         {/* Disclaimer Note */}
-        <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center gap-2.5 text-xs text-slate-400">
-          <Info className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-[#0a0a0a] border border-neutral-800 flex items-center gap-2.5 text-xs text-neutral-400">
+          <Info className="w-4 h-4 text-amber-400 flex-shrink-0" />
           <span>
             Nutritional values are approximate scientific estimates and may vary based on brand, recipe, and cooking preparation.
           </span>
@@ -331,14 +331,14 @@ export default function NutritionPage() {
               return (
                 <div
                   key={type}
-                  className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3"
+                  className="p-5 rounded-3xl bg-[#0a0a0a] border border-neutral-800 space-y-3"
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-extrabold text-sm text-white capitalize">
                         {type.toLowerCase()}
                       </h3>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-neutral-400">
                         {mealCalories} kcal • {mealProtein}g protein
                       </p>
                     </div>
@@ -346,7 +346,7 @@ export default function NutritionPage() {
                     <button
                       type="button"
                       onClick={() => openLogModal(type)}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center gap-1 transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs font-bold flex items-center gap-1 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add</span>
@@ -354,7 +354,7 @@ export default function NutritionPage() {
                   </div>
 
                   {mealItems.length === 0 ? (
-                    <div className="py-4 text-center rounded-2xl bg-slate-950/40 border border-dashed border-slate-800/80 text-slate-500 text-xs">
+                    <div className="py-4 text-center rounded-2xl bg-neutral-950/40 border border-dashed border-neutral-800 text-neutral-500 text-xs">
                       No items logged for {type.toLowerCase()} yet.
                     </div>
                   ) : (
@@ -362,19 +362,19 @@ export default function NutritionPage() {
                       {mealItems.map((item: MealLog) => (
                         <div
                           key={item.id}
-                          className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs"
+                          className="p-3 rounded-2xl bg-neutral-950/80 border border-neutral-800 flex items-center justify-between text-xs"
                         >
                           <div>
                             <div className="font-bold text-white">{item.foodName}</div>
-                            <div className="text-[11px] text-slate-400">
+                            <div className="text-[11px] text-neutral-400">
                               {item.quantity} {item.servingUnit}
                             </div>
                           </div>
 
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <span className="font-bold text-emerald-400">{item.calories} kcal</span>
-                              <div className="text-[10px] text-slate-400">
+                              <span className="font-bold text-amber-400">{item.calories} kcal</span>
+                              <div className="text-[10px] text-neutral-400">
                                 P: {item.protein}g | C: {item.carbs}g | F: {item.fat}g
                               </div>
                             </div>
@@ -382,7 +382,7 @@ export default function NutritionPage() {
                             <button
                               type="button"
                               onClick={() => handleDeleteLog(item.id)}
-                              className="p-1 rounded-lg text-slate-500 hover:text-red-400 transition-colors"
+                              className="p-1 rounded-lg text-neutral-500 hover:text-red-400 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -400,21 +400,21 @@ export default function NutritionPage() {
 
       {/* LOG FOOD MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-[#0a0d14] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-6 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <div>
                 <h3 className="text-base font-bold text-white">
                   Add Food to {selectedMealType.toLowerCase()}
                 </h3>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-neutral-400">
                   Search 110+ items or select an authentic Indian dish
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -436,8 +436,8 @@ export default function NutritionPage() {
                   onClick={() => setFoodCategory(c.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                     foodCategory === c.id
-                      ? 'bg-emerald-500 text-black'
-                      : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold shadow-sm'
+                      : 'bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white'
                   }`}
                 >
                   {c.label}
@@ -447,13 +447,13 @@ export default function NutritionPage() {
 
             {/* Search Input */}
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={foodSearchQuery}
                 onChange={(e) => setFoodSearchQuery(e.target.value)}
                 placeholder="Search Paneer, Chicken Biryani, Dosa, Eggs, Oats..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-400"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:border-amber-400"
               />
             </div>
 
@@ -468,24 +468,24 @@ export default function NutritionPage() {
                     onClick={() => handleSelectFood(food)}
                     className={`w-full p-3 rounded-2xl text-left border transition-all flex items-center justify-between ${
                       isSelected
-                        ? 'bg-emerald-500/20 border-emerald-400'
-                        : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                        ? 'bg-amber-500/15 border-amber-400/50 shadow-sm'
+                        : 'bg-[#050505] border-neutral-800 hover:border-neutral-700'
                     }`}
                   >
                     <div>
                       <div className="text-xs font-bold text-white flex items-center gap-2">
                         <span>{food.name}</span>
                         {food.isIndian && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 font-bold">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
                             Indian
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">
+                      <div className="text-[10px] text-neutral-400 mt-0.5">
                         {food.caloriesPer100} kcal per 100g • {food.proteinPer100}g P • {food.carbsPer100}g C
                       </div>
                     </div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
                   </button>
                 );
               })}
@@ -493,9 +493,9 @@ export default function NutritionPage() {
 
             {/* Dynamic Serving & Portion Customizer */}
             {selectedFood && (
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-400 uppercase">
+                  <span className="text-xs font-bold text-amber-400 uppercase">
                     Portion & Serving Unit
                   </span>
                   <span className="text-xs font-bold text-white">{selectedFood.name}</span>
@@ -504,7 +504,7 @@ export default function NutritionPage() {
                 <div className="grid grid-cols-2 gap-3">
                   {/* Quantity */}
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase mb-1">
                       Quantity
                     </label>
                     <input
@@ -513,19 +513,19 @@ export default function NutritionPage() {
                       min="0.1"
                       value={quantityInput}
                       onChange={(e) => setQuantityInput(parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold text-sm focus:border-emerald-400"
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white font-bold text-sm focus:border-amber-400"
                     />
                   </div>
 
                   {/* Serving Unit Dropdown */}
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase mb-1">
                       Serving Unit
                     </label>
                     <select
                       value={selectedUnit}
                       onChange={(e) => setSelectedUnit(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold text-sm focus:border-emerald-400 capitalize"
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white font-bold text-sm focus:border-amber-400 capitalize"
                     >
                       {(selectedFood.servingUnits
                         ? JSON.parse(selectedFood.servingUnits)
@@ -540,12 +540,12 @@ export default function NutritionPage() {
                 </div>
 
                 {/* Real-time Recalculated Nutrition Output */}
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
+                <div className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 flex items-center justify-between text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase">Calories:</span>{' '}
-                    <strong className="text-emerald-400 text-sm">{calculated.calories} kcal</strong>
+                    <span className="text-[10px] text-neutral-400 uppercase">Calories:</span>{' '}
+                    <strong className="text-amber-400 text-sm">{calculated.calories} kcal</strong>
                   </div>
-                  <div className="text-right text-[11px] text-slate-300">
+                  <div className="text-right text-[11px] text-neutral-300">
                     P: <strong>{calculated.protein}g</strong> | C: <strong>{calculated.carbs}g</strong> | F: <strong>{calculated.fat}g</strong>
                   </div>
                 </div>
@@ -561,7 +561,7 @@ export default function NutritionPage() {
                   type="button"
                   onClick={handleSaveFoodLog}
                   disabled={addingFood || quantityInput <= 0}
-                  className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 text-black font-extrabold text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   {addingFood ? (
                     <>

@@ -94,31 +94,31 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080a0f] text-white flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-hidden">
       {/* Glow backgrounds */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header & Progress */}
       <div className="max-w-2xl mx-auto w-full z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-black font-bold">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-500 flex items-center justify-center text-black font-bold shadow-lg shadow-amber-500/20">
               <Dumbbell className="w-4 h-4" />
             </div>
             <span className="font-extrabold tracking-tight text-lg">
-              GYM<span className="text-emerald-400">IN</span>
+              GYM<span className="text-amber-400">IN</span>
             </span>
           </div>
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+          <span className="text-xs font-semibold text-neutral-400 uppercase tracking-widest">
             Step {currentStep} of {totalSteps}
           </span>
         </div>
 
         {/* Visual Progress Bar */}
-        <div className="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden mb-8 border border-slate-700/50">
+        <div className="w-full bg-neutral-800/80 h-2 rounded-full overflow-hidden mb-8 border border-neutral-700/50">
           <div
-            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300 rounded-full"
+            className="h-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 transition-all duration-300 rounded-full"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
         </div>
@@ -143,13 +143,13 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 1
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   What is your main goal?
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   We'll tailor your workout splits, volume, and calorie targets around this.
                 </p>
               </div>
@@ -172,13 +172,13 @@ export default function OnboardingPage() {
                       onClick={() => setFormData({ ...formData, goal: item.id })}
                       className={`p-4 rounded-2xl text-left border transition-all flex items-start gap-4 ${
                         isSelected
-                          ? 'bg-emerald-500/15 border-emerald-400 text-white shadow-lg shadow-emerald-500/10'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900/90'
+                          ? 'bg-amber-500/15 border-amber-400 text-white shadow-lg shadow-amber-500/10'
+                          : 'bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:bg-neutral-900/90'
                       }`}
                     >
                       <div
                         className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'bg-emerald-400 text-black' : 'bg-slate-800 text-slate-400'
+                          isSelected ? 'bg-amber-400 text-black' : 'bg-neutral-800 text-neutral-400'
                         }`}
                       >
                         <Icon className="w-5 h-5" />
@@ -186,9 +186,9 @@ export default function OnboardingPage() {
                       <div className="flex-1">
                         <div className="font-bold text-sm text-white flex items-center justify-between">
                           {item.title}
-                          {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                          {isSelected && <Check className="w-4 h-4 text-amber-400" />}
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5">{item.desc}</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">{item.desc}</p>
                       </div>
                     </button>
                   );
@@ -207,13 +207,13 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 2
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   What is your fitness experience?
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   This adjusts exercise selection complexity and recommended starting sets.
                 </p>
               </div>
@@ -232,16 +232,16 @@ export default function OnboardingPage() {
                       onClick={() => setFormData({ ...formData, experience: item.id })}
                       className={`w-full p-5 rounded-2xl text-left border transition-all flex items-center justify-between ${
                         isSelected
-                          ? 'bg-emerald-500/15 border-emerald-400 text-white shadow-lg shadow-emerald-500/10'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-amber-500/15 border-amber-400 text-white shadow-lg shadow-amber-500/10'
+                          : 'bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:border-neutral-700'
                       }`}
                     >
                       <div>
                         <div className="font-bold text-base text-white">{item.title}</div>
-                        <div className="text-xs text-slate-400 mt-1">{item.desc}</div>
+                        <div className="text-xs text-neutral-400 mt-1">{item.desc}</div>
                       </div>
                       {isSelected && (
-                        <div className="w-7 h-7 rounded-full bg-emerald-400 flex items-center justify-center text-black">
+                        <div className="w-7 h-7 rounded-full bg-amber-400 flex items-center justify-center text-black">
                           <Check className="w-4 h-4" />
                         </div>
                       )}
@@ -262,13 +262,13 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 3
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   How many days can you work out?
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   We'll structure your weekly split so every muscle group receives optimal recovery.
                 </p>
               </div>
@@ -283,17 +283,17 @@ export default function OnboardingPage() {
                       onClick={() => setFormData({ ...formData, daysPerWeek: num })}
                       className={`p-6 rounded-2xl border text-center transition-all ${
                         isSelected
-                          ? 'bg-emerald-500/20 border-emerald-400 shadow-lg shadow-emerald-500/15'
-                          : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                          ? 'bg-amber-500/15 border-amber-500/60 shadow-lg shadow-amber-500/10'
+                          : 'bg-[#0a0a0a] border-neutral-800 hover:border-neutral-700'
                       }`}
                     >
-                      <div className={`text-4xl font-extrabold ${isSelected ? 'text-emerald-400' : 'text-white'}`}>
+                      <div className={`text-4xl font-extrabold ${isSelected ? 'text-amber-400' : 'text-white'}`}>
                         {num}
                       </div>
-                      <div className="text-xs text-slate-400 mt-1 font-semibold uppercase tracking-wider">
+                      <div className="text-xs text-neutral-400 mt-1 font-semibold uppercase tracking-wider">
                         {num === 1 ? 'Day / week' : 'Days / week'}
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-2">
+                      <div className="text-[11px] text-neutral-500 mt-2">
                         {num === 3 ? 'Full Body Split' : num === 4 ? 'Upper / Lower' : num === 5 ? '5-Day Hypertrophy' : num === 6 ? 'Push / Pull / Legs' : 'High Volume'}
                       </div>
                     </button>
@@ -313,13 +313,13 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 4
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   How much time do you have per session?
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   We'll adjust the number of exercises and rest periods to match your schedule.
                 </p>
               </div>
@@ -340,20 +340,20 @@ export default function OnboardingPage() {
                       onClick={() => setFormData({ ...formData, duration: item.value })}
                       className={`w-full p-4 rounded-2xl text-left border transition-all flex items-center justify-between ${
                         isSelected
-                          ? 'bg-emerald-500/15 border-emerald-400 text-white shadow-lg shadow-emerald-500/10'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-amber-500/15 border-amber-500/50 text-white shadow-lg shadow-amber-500/10'
+                          : 'bg-[#0a0a0a] border-neutral-800 text-neutral-300 hover:border-neutral-700'
                       }`}
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-emerald-400 text-black' : 'bg-slate-800 text-slate-400'}`}>
+                        <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-amber-400 text-black font-bold' : 'bg-neutral-800 text-neutral-400'}`}>
                           <Clock className="w-5 h-5" />
                         </div>
                         <div>
                           <div className="font-bold text-sm text-white">{item.label}</div>
-                          <div className="text-xs text-slate-400">{item.desc}</div>
+                          <div className="text-xs text-neutral-400">{item.desc}</div>
                         </div>
                       </div>
-                      {isSelected && <Check className="w-5 h-5 text-emerald-400" />}
+                      {isSelected && <Check className="w-5 h-5 text-amber-400" />}
                     </button>
                   );
                 })}
@@ -371,13 +371,13 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 5
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   Where do you work out?
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   We'll prioritize exercises available in your environment.
                 </p>
               </div>
@@ -396,15 +396,15 @@ export default function OnboardingPage() {
                       onClick={() => setFormData({ ...formData, location: item.id })}
                       className={`p-5 rounded-2xl border text-left transition-all ${
                         isSelected
-                          ? 'bg-emerald-500/15 border-emerald-400 shadow-lg shadow-emerald-500/10'
-                          : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                          ? 'bg-amber-500/15 border-amber-500/50 shadow-lg shadow-amber-500/10'
+                          : 'bg-[#0a0a0a] border-neutral-800 hover:border-neutral-700'
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${isSelected ? 'bg-emerald-400 text-black' : 'bg-slate-800 text-slate-400'}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${isSelected ? 'bg-amber-400 text-black' : 'bg-neutral-800 text-neutral-400'}`}>
                         <MapPin className="w-5 h-5" />
                       </div>
                       <div className="font-bold text-sm text-white">{item.title}</div>
-                      <div className="text-xs text-slate-400 mt-1">{item.desc}</div>
+                      <div className="text-xs text-neutral-400 mt-1">{item.desc}</div>
                     </button>
                   );
                 })}
@@ -422,13 +422,13 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 6
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   What equipment do you have access to?
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   Select all that apply.
                 </p>
               </div>
@@ -453,12 +453,12 @@ export default function OnboardingPage() {
                       onClick={() => toggleEquipment(eq)}
                       className={`p-3.5 rounded-xl border text-left text-sm font-semibold transition-all flex items-center justify-between ${
                         isSelected
-                          ? 'bg-emerald-500/20 border-emerald-400 text-white'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-amber-500/20 border-amber-500/60 text-white'
+                          : 'bg-[#0a0a0a] border-neutral-800 text-neutral-400 hover:border-neutral-700'
                       }`}
                     >
                       <span>{eq}</span>
-                      {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                      {isSelected && <Check className="w-4 h-4 text-amber-400" />}
                     </button>
                   );
                 })}
@@ -476,32 +476,32 @@ export default function OnboardingPage() {
               className="space-y-6"
             >
               <div>
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
                   Question 7
                 </span>
                 <h1 className="text-3xl font-extrabold tracking-tight mt-1">
                   Your Body Information
                 </h1>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   Used strictly to calculate your estimated daily calories and protein via the scientific Mifflin-St Jeor formula.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
                     Height (cm)
                   </label>
                   <input
                     type="number"
                     value={formData.heightCm}
                     onChange={(e) => setFormData({ ...formData, heightCm: Number(e.target.value) })}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:border-emerald-400"
+                    className="w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-neutral-800 text-white text-sm focus:border-amber-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
                     Current Weight (kg)
                   </label>
                   <input
@@ -509,12 +509,12 @@ export default function OnboardingPage() {
                     step="0.1"
                     value={formData.weightKg}
                     onChange={(e) => setFormData({ ...formData, weightKg: Number(e.target.value) })}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:border-emerald-400"
+                    className="w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-neutral-800 text-white text-sm focus:border-amber-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
                     Target Weight (kg, optional)
                   </label>
                   <input
@@ -522,18 +522,18 @@ export default function OnboardingPage() {
                     step="0.1"
                     value={formData.targetWeightKg}
                     onChange={(e) => setFormData({ ...formData, targetWeightKg: Number(e.target.value) })}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:border-emerald-400"
+                    className="w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-neutral-800 text-white text-sm focus:border-amber-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
                     Activity Level
                   </label>
                   <select
                     value={formData.activityLevel}
                     onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:border-emerald-400"
+                    className="w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-neutral-800 text-white text-sm focus:border-amber-400 focus:outline-none"
                   >
                     <option value="SEDENTARY">Sedentary (desk job, minimal movement)</option>
                     <option value="LIGHT">Lightly Active (light exercise 1-3 days/wk)</option>
@@ -544,8 +544,8 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3 text-xs text-slate-300">
-                <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs text-neutral-300">
+                <ShieldCheck className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                 <span>
                   <strong>Privacy & Health Note:</strong> Your statistics are 100% private and only used to determine personal estimates. Calorie and macro values are approximations and not medical advice.
                 </span>
@@ -556,12 +556,12 @@ export default function OnboardingPage() {
       </div>
 
       {/* Bottom Navigation Buttons */}
-      <div className="max-w-2xl mx-auto w-full z-10 pt-6 flex items-center justify-between border-t border-slate-800">
+      <div className="max-w-2xl mx-auto w-full z-10 pt-6 flex items-center justify-between border-t border-neutral-800">
         <button
           type="button"
           onClick={handleBack}
           disabled={currentStep === 1 || loading}
-          className="px-5 py-3 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition-all flex items-center gap-2"
+          className="px-5 py-3 rounded-xl border border-neutral-800 text-neutral-400 hover:text-amber-400 hover:border-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition-all flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -571,7 +571,7 @@ export default function OnboardingPage() {
           type="button"
           onClick={handleNext}
           disabled={loading}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-bold text-xs shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black font-extrabold text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2"
         >
           {loading ? (
             <>

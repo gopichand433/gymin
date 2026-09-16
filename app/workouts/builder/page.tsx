@@ -198,13 +198,13 @@ export default function PlanBuilderPage() {
             <button
               type="button"
               onClick={() => router.push('/workouts')}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+              className="p-2 rounded-xl bg-[#0a0a0a] border border-neutral-800 text-neutral-400 hover:text-white"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">Workout Plan Builder</h1>
-              <p className="text-xs text-slate-400">Design your own splits, routines, and rest intervals</p>
+              <p className="text-xs text-neutral-400">Design your own splits, routines, and rest intervals</p>
             </div>
           </div>
 
@@ -212,7 +212,7 @@ export default function PlanBuilderPage() {
             type="button"
             onClick={handleSavePlan}
             disabled={saving}
-            className="px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all"
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>Save & Set Active Plan</span>
@@ -226,28 +226,28 @@ export default function PlanBuilderPage() {
         )}
 
         {/* Plan Details Card */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
               Plan Title
             </label>
             <input
               type="text"
               value={planName}
               onChange={(e) => setPlanName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold text-sm focus:border-emerald-400"
+              className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-bold text-sm focus:border-amber-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
               Description / Notes
             </label>
             <input
               type="text"
               value={planDescription}
               onChange={(e) => setPlanDescription(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-emerald-400"
+              className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:border-amber-400"
             />
           </div>
         </div>
@@ -256,16 +256,16 @@ export default function PlanBuilderPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-emerald-400" />
+              <Layers className="w-4 h-4 text-amber-400" />
               <span>Workout Days ({days.length})</span>
             </h2>
 
             <button
               type="button"
               onClick={addDay}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-400" />
+              <Plus className="w-3.5 h-3.5 text-amber-400" />
               <span>Add Another Day</span>
             </button>
           </div>
@@ -273,18 +273,18 @@ export default function PlanBuilderPage() {
           {days.map((day, dayIdx) => (
             <div
               key={day.id}
-              className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-4"
+              className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 space-y-4"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-800">
                 <div className="flex items-center gap-3 flex-1">
-                  <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center flex-shrink-0">
+                  <span className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black text-xs flex items-center justify-center flex-shrink-0">
                     {dayIdx + 1}
                   </span>
                   <input
                     type="text"
                     value={day.name}
                     onChange={(e) => updateDayName(dayIdx, e.target.value)}
-                    className="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-white font-bold text-sm focus:border-emerald-400"
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-white font-bold text-sm focus:border-amber-400"
                   />
                 </div>
 
@@ -292,7 +292,7 @@ export default function PlanBuilderPage() {
                   <button
                     type="button"
                     onClick={() => openAddExercise(dayIdx)}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold hover:bg-emerald-500/25 transition-colors flex items-center gap-1"
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/25 transition-colors flex items-center gap-1"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Exercise</span>
@@ -302,7 +302,7 @@ export default function PlanBuilderPage() {
                     <button
                       type="button"
                       onClick={() => removeDay(dayIdx)}
-                      className="p-2 rounded-xl text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors"
+                      className="p-2 rounded-xl text-neutral-500 hover:text-red-400 hover:bg-neutral-800 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -312,7 +312,7 @@ export default function PlanBuilderPage() {
 
               {/* Day's Exercises */}
               {day.exercises.length === 0 ? (
-                <div className="p-6 text-center rounded-2xl bg-slate-950/40 border border-dashed border-slate-800 text-slate-500 text-xs">
+                <div className="p-6 text-center rounded-2xl bg-neutral-950/40 border border-dashed border-neutral-800 text-neutral-500 text-xs">
                   No exercises added to this day yet. Click "+ Add Exercise" above.
                 </div>
               ) : (
@@ -320,19 +320,19 @@ export default function PlanBuilderPage() {
                   {day.exercises.map((ex, exIdx) => (
                     <div
                       key={exIdx}
-                      className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3">
-                        <Dumbbell className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                        <Dumbbell className="w-4 h-4 text-amber-400 flex-shrink-0" />
                         <div>
                           <div className="text-xs font-bold text-white">{ex.exerciseName}</div>
-                          <div className="text-[10px] text-slate-400">{ex.primaryMuscle}</div>
+                          <div className="text-[10px] text-neutral-400">{ex.primaryMuscle}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <span className="text-slate-400 text-[11px]">Sets:</span>
+                          <span className="text-neutral-400 text-[11px]">Sets:</span>
                           <input
                             type="number"
                             min="1"
@@ -346,24 +346,24 @@ export default function PlanBuilderPage() {
                                 parseInt(e.target.value, 10) || 3
                               )
                             }
-                            className="w-12 px-2 py-1 rounded bg-slate-900 border border-slate-700 text-center text-xs font-bold text-white"
+                            className="w-12 px-2 py-1 rounded bg-neutral-900 border border-neutral-700 text-center text-xs font-bold text-white"
                           />
                         </div>
 
                         <div className="flex items-center gap-1.5 text-xs">
-                          <span className="text-slate-400 text-[11px]">Reps:</span>
+                          <span className="text-neutral-400 text-[11px]">Reps:</span>
                           <input
                             type="text"
                             value={ex.targetReps}
                             onChange={(e) =>
                               updateExerciseParam(dayIdx, exIdx, 'targetReps', e.target.value)
                             }
-                            className="w-16 px-2 py-1 rounded bg-slate-900 border border-slate-700 text-center text-xs font-bold text-white"
+                            className="w-16 px-2 py-1 rounded bg-neutral-900 border border-neutral-700 text-center text-xs font-bold text-white"
                           />
                         </div>
 
                         <div className="flex items-center gap-1.5 text-xs">
-                          <span className="text-slate-400 text-[11px]">Rest:</span>
+                          <span className="text-neutral-400 text-[11px]">Rest:</span>
                           <input
                             type="number"
                             step="15"
@@ -376,15 +376,15 @@ export default function PlanBuilderPage() {
                                 parseInt(e.target.value, 10) || 60
                               )
                             }
-                            className="w-14 px-2 py-1 rounded bg-slate-900 border border-slate-700 text-center text-xs font-bold text-white"
+                            className="w-14 px-2 py-1 rounded bg-neutral-900 border border-neutral-700 text-center text-xs font-bold text-white"
                           />
-                          <span className="text-[10px] text-slate-500">s</span>
+                          <span className="text-[10px] text-neutral-500">s</span>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => removeExercise(dayIdx, exIdx)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 transition-colors"
+                          className="p-1.5 rounded-lg text-neutral-500 hover:text-red-400 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -400,27 +400,27 @@ export default function PlanBuilderPage() {
 
       {/* EXERCISE PICKER MODAL */}
       {isPickerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#0a0d14] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <h3 className="text-base font-bold text-white">Select Exercise</h3>
               <button
                 type="button"
                 onClick={() => setIsPickerOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={pickerSearch}
                 onChange={(e) => setPickerSearch(e.target.value)}
                 placeholder="Search exercise or muscle..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-400"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:border-amber-400"
               />
             </div>
 
@@ -430,17 +430,17 @@ export default function PlanBuilderPage() {
                   key={ex.id}
                   type="button"
                   onClick={() => selectExercise(ex)}
-                  className="w-full p-3 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 text-left flex items-center justify-between transition-colors group"
+                  className="w-full p-3 rounded-xl bg-neutral-950/60 hover:bg-neutral-900/80 border border-neutral-800 text-left flex items-center justify-between transition-colors group"
                 >
                   <div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">
+                    <div className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
                       {ex.name}
                     </div>
-                    <div className="text-[10px] text-slate-400">
+                    <div className="text-[10px] text-neutral-400">
                       {ex.primaryMuscle} • {ex.equipment}
                     </div>
                   </div>
-                  <Plus className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
+                  <Plus className="w-4 h-4 text-neutral-500 group-hover:text-amber-400" />
                 </button>
               ))}
             </div>

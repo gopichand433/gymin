@@ -121,9 +121,9 @@ export default function ActiveWorkoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080a0f] flex items-center justify-center text-white">
-        <div className="flex items-center gap-3 text-sm text-slate-400">
-          <Dumbbell className="w-5 h-5 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
+        <div className="flex items-center gap-3 text-sm text-neutral-400">
+          <Dumbbell className="w-5 h-5 animate-spin text-amber-400" />
           <span>Setting up your workout environment...</span>
         </div>
       </div>
@@ -250,21 +250,21 @@ export default function ActiveWorkoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080a0f] text-slate-100 flex flex-col justify-between max-w-4xl mx-auto px-4 py-4 sm:py-6">
+    <div className="min-h-screen bg-[#050505] text-neutral-100 flex flex-col justify-between max-w-4xl mx-auto px-4 py-4 sm:py-6">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
         <button
           type="button"
           onClick={() => router.push('/workouts')}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Exit Workout</span>
         </button>
 
         {/* Workout Timer */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-bold text-emerald-400">
-          <Clock className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-bold text-amber-400">
+          <Clock className="w-3.5 h-3.5 text-amber-400" />
           <span>{formatTime(elapsedSeconds)}</span>
         </div>
 
@@ -272,7 +272,7 @@ export default function ActiveWorkoutPage() {
           type="button"
           onClick={() => handleFinishWorkout()}
           disabled={saving}
-          className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-extrabold transition-colors shadow-md shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-1.5"
+          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black text-xs font-extrabold transition-colors shadow-md shadow-amber-500/20 disabled:opacity-50 flex items-center gap-1.5"
         >
           {saving ? (
             <>
@@ -292,7 +292,7 @@ export default function ActiveWorkoutPage() {
           <button
             type="button"
             onClick={() => setFinishError('')}
-            className="p-1 rounded-lg text-slate-400 hover:text-white"
+            className="p-1 rounded-lg text-neutral-400 hover:text-white"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -304,15 +304,15 @@ export default function ActiveWorkoutPage() {
         {/* Day & Progress Line */}
         <div className="flex items-center justify-between text-xs">
           <div>
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">
               {todayDay?.name}
             </span>
             <div className="font-extrabold text-white text-base">
               Exercise {currentExerciseIndex + 1} of {totalExercises}
             </div>
           </div>
-          <div className="text-right text-slate-400 font-semibold">
-            Set <span className="text-emerald-400 font-bold text-sm">{currentSetNumber}</span> of {totalSetsForCurrent}
+          <div className="text-right text-neutral-400 font-semibold">
+            Set <span className="text-amber-400 font-bold text-sm">{currentSetNumber}</span> of {totalSetsForCurrent}
           </div>
         </div>
 
@@ -344,36 +344,36 @@ export default function ActiveWorkoutPage() {
 
         {/* Previous Performance Memory Note */}
         {prevPerf && (
-          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-400">Previous Session Benchmark:</span>
-            <span className="font-bold text-emerald-400">
+          <div className="p-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 flex items-center justify-between text-xs">
+            <span className="text-neutral-400">Previous Session Benchmark:</span>
+            <span className="font-bold text-amber-400">
               {prevPerf.weightKg} kg × {prevPerf.reps} reps
             </span>
           </div>
         )}
 
         {/* Set Logger Card */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
+        <div className="p-6 rounded-3xl bg-neutral-900/90 border border-neutral-800 shadow-xl space-y-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
               Current Working Set
             </span>
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
               Target: {currentWorkoutExercise?.targetReps} Reps
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {/* Weight Input */}
-            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="p-4 rounded-2xl bg-neutral-950/80 border border-neutral-800 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                 Weight (KG)
               </span>
               <div className="flex items-center justify-center gap-3 mt-2">
                 <button
                   type="button"
                   onClick={() => setWeightInput((w) => Math.max(0, w - 2.5))}
-                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white"
+                  className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-white"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
@@ -387,7 +387,7 @@ export default function ActiveWorkoutPage() {
                 <button
                   type="button"
                   onClick={() => setWeightInput((w) => w + 2.5)}
-                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white"
+                  className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-white"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -395,15 +395,15 @@ export default function ActiveWorkoutPage() {
             </div>
 
             {/* Reps Input */}
-            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="p-4 rounded-2xl bg-neutral-950/80 border border-neutral-800 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                 Actual Reps
               </span>
               <div className="flex items-center justify-center gap-3 mt-2">
                 <button
                   type="button"
                   onClick={() => setRepsInput((r) => Math.max(1, r - 1))}
-                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white"
+                  className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-white"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
@@ -416,7 +416,7 @@ export default function ActiveWorkoutPage() {
                 <button
                   type="button"
                   onClick={() => setRepsInput((r) => r + 1)}
-                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white"
+                  className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-white"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -429,7 +429,7 @@ export default function ActiveWorkoutPage() {
             <button
               type="button"
               onClick={handleCompleteSet}
-              className="flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-extrabold text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-[0.99]"
+              className="flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black font-extrabold text-sm shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-[0.99]"
             >
               <CheckCircle2 className="w-5 h-5" />
               <span>Complete Set {currentSetNumber}</span>
@@ -437,7 +437,7 @@ export default function ActiveWorkoutPage() {
             <button
               type="button"
               onClick={handleSkipExercise}
-              className="py-4 px-4 rounded-2xl border border-slate-700 hover:border-slate-600 text-slate-400 hover:text-white text-xs font-bold transition-colors flex items-center gap-1.5"
+              className="py-4 px-4 rounded-2xl border border-neutral-700 hover:border-neutral-600 text-neutral-400 hover:text-white text-xs font-bold transition-colors flex items-center gap-1.5"
             >
               <SkipForward className="w-4 h-4" />
               <span>Skip</span>
@@ -447,14 +447,14 @@ export default function ActiveWorkoutPage() {
 
         {/* Rest Timer Banner */}
         {restTimerSeconds !== null && (
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-extrabold text-sm">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-extrabold text-sm">
                 {restTimerSeconds}s
               </div>
               <div>
                 <div className="text-xs font-bold text-white">Resting between sets</div>
-                <div className="text-[10px] text-slate-400">Deep breaths & hydrate</div>
+                <div className="text-[10px] text-neutral-400">Deep breaths & hydrate</div>
               </div>
             </div>
 
@@ -467,8 +467,8 @@ export default function ActiveWorkoutPage() {
                   onClick={() => startRestTimer(sec)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
                     restDuration === sec
-                      ? 'bg-emerald-400 text-black'
-                      : 'bg-slate-800 text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-black'
+                      : 'bg-neutral-800 text-neutral-400 hover:text-white'
                   }`}
                 >
                   {sec}s
@@ -477,7 +477,7 @@ export default function ActiveWorkoutPage() {
               <button
                 type="button"
                 onClick={() => setRestTimerSeconds(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white ml-1"
+                className="p-1 rounded-lg text-neutral-400 hover:text-white ml-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -487,7 +487,7 @@ export default function ActiveWorkoutPage() {
 
         {/* Rest Complete Notification Toast */}
         {restCompleteAlert && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-black font-extrabold text-sm text-center shadow-2xl animate-bounce">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-black font-extrabold text-sm text-center shadow-2xl animate-bounce">
             REST COMPLETE — NEXT SET 💪
           </div>
         )}
@@ -496,8 +496,8 @@ export default function ActiveWorkoutPage() {
       {/* WORKOUT COMPLETION MODAL */}
       {isFinished && workoutSummary && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#0a0d14] border border-emerald-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl text-center">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/30">
+          <div className="w-full max-w-md bg-[#0a0a0a] border border-amber-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl text-center">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 flex items-center justify-center mx-auto shadow-xl shadow-amber-500/30">
               <Trophy className="w-8 h-8 text-black" />
             </div>
 
@@ -505,7 +505,7 @@ export default function ActiveWorkoutPage() {
               <h2 className="text-2xl sm:text-3xl font-black text-white">
                 Workout Complete 🎉
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-neutral-400 mt-1">
                 Outstanding effort! All sets and volume have been saved to your records.
               </p>
             </div>
@@ -518,7 +518,7 @@ export default function ActiveWorkoutPage() {
                   <span>🏆 NEW PERSONAL RECORD!</span>
                 </div>
                 {workoutSummary.newPrs.map((pr: any, i: number) => (
-                  <div key={i} className="text-xs text-slate-200">
+                  <div key={i} className="text-xs text-neutral-200">
                     • <strong>{pr.exerciseName}</strong>: {pr.weightKg} kg × {pr.reps} reps
                   </div>
                 ))}
@@ -527,27 +527,27 @@ export default function ActiveWorkoutPage() {
 
             {/* Stats Breakdown */}
             <div className="grid grid-cols-2 gap-3 text-left">
-              <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Duration</span>
+              <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800">
+                <span className="text-[10px] uppercase font-bold text-neutral-400">Duration</span>
                 <div className="text-lg font-black text-white mt-0.5">
                   {formatTime(workoutSummary.durationSec)}
                 </div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Total Volume</span>
-                <div className="text-lg font-black text-emerald-400 mt-0.5">
+              <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800">
+                <span className="text-[10px] uppercase font-bold text-neutral-400">Total Volume</span>
+                <div className="text-lg font-black text-amber-400 mt-0.5">
                   {workoutSummary.totalVolumeKg} kg
                 </div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Total Sets</span>
+              <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800">
+                <span className="text-[10px] uppercase font-bold text-neutral-400">Total Sets</span>
                 <div className="text-lg font-black text-white mt-0.5">
                   {workoutSummary.totalSets}
                 </div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Est. Calories</span>
-                <div className="text-lg font-black text-amber-400 mt-0.5">
+              <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800">
+                <span className="text-[10px] uppercase font-bold text-neutral-400">Est. Calories</span>
+                <div className="text-lg font-black text-yellow-400 mt-0.5">
                   ~{workoutSummary.caloriesBurned} kcal
                 </div>
               </div>
@@ -556,7 +556,7 @@ export default function ActiveWorkoutPage() {
             <button
               type="button"
               onClick={() => router.push('/dashboard')}
-              className="w-full py-3.5 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-emerald-500/20"
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-amber-500/20"
             >
               Return to Dashboard
             </button>

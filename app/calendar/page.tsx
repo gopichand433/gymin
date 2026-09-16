@@ -78,23 +78,23 @@ export default function CalendarPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
               Habit & Consistency Logging
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-0.5">
               Fitness Calendar
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-neutral-400 mt-1">
               Tap any date to inspect workouts, meals, steps, and weight logs
             </p>
           </div>
 
           {/* Month Navigation */}
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 p-1.5 rounded-2xl">
+          <div className="flex items-center gap-3 bg-[#0a0a0a] border border-neutral-800 p-1.5 rounded-2xl">
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -104,7 +104,7 @@ export default function CalendarPage() {
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -112,28 +112,28 @@ export default function CalendarPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400">
+        <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-neutral-400">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <span>Workout Done</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
             <span>Meals Logged</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-300" />
             <span>Steps Target</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-slate-600" />
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-700" />
             <span>Rest Day</span>
           </div>
         </div>
 
         {/* Calendar Grid */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="grid grid-cols-7 text-center text-xs font-extrabold text-slate-400 uppercase tracking-wider pb-3 border-b border-slate-800">
+        <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-neutral-800 shadow-xl space-y-4">
+          <div className="grid grid-cols-7 text-center text-xs font-extrabold text-neutral-400 uppercase tracking-wider pb-3 border-b border-neutral-800">
             <div>Sun</div>
             <div>Mon</div>
             <div>Tue</div>
@@ -163,33 +163,33 @@ export default function CalendarPage() {
                   onClick={() => handleDayClick(day)}
                   className={`h-20 sm:h-24 p-2 rounded-2xl border text-left flex flex-col justify-between transition-all group ${
                     hasWorkout
-                      ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/15'
-                      : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900'
+                      ? 'bg-amber-500/10 border-amber-400/40 hover:bg-amber-500/15'
+                      : 'bg-neutral-950/60 border-neutral-800/80 hover:border-neutral-700 hover:bg-neutral-900'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-white group-hover:text-emerald-400">
+                    <span className="text-xs font-black text-white group-hover:text-amber-400">
                       {day}
                     </span>
                     {hasWorkout && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="w-2 h-2 rounded-full bg-amber-400" />
                     )}
                   </div>
 
                   {/* Day activity icons */}
                   <div className="space-y-1">
                     {hasWorkout && (
-                      <div className="text-[10px] font-bold text-emerald-400 truncate hidden sm:block">
+                      <div className="text-[10px] font-bold text-amber-400 truncate hidden sm:block">
                         {dayData.workouts[0].dayName}
                       </div>
                     )}
                     {hasFood && (
-                      <div className="text-[9px] text-slate-400 truncate hidden sm:block">
+                      <div className="text-[9px] text-neutral-400 truncate hidden sm:block">
                         {Math.round(dayData.calories)} kcal
                       </div>
                     )}
                     {hasSteps && (
-                      <div className="text-[9px] text-cyan-400 truncate hidden sm:block">
+                      <div className="text-[9px] text-amber-300 truncate hidden sm:block">
                         {dayData.steps.toLocaleString()} steps
                       </div>
                     )}
@@ -197,9 +197,9 @@ export default function CalendarPage() {
 
                   {/* Mobile mini dots */}
                   <div className="flex items-center gap-1 sm:hidden">
-                    {hasWorkout && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-                    {hasFood && <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />}
-                    {hasSteps && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                    {hasWorkout && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                    {hasFood && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />}
+                    {hasSteps && <span className="w-1.5 h-1.5 rounded-full bg-amber-300" />}
                   </div>
                 </button>
               );
@@ -210,11 +210,11 @@ export default function CalendarPage() {
 
       {/* DAY DETAIL MODAL */}
       {selectedDaySummary && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#0a0d14] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   Daily Overview
                 </span>
                 <h3 className="text-lg font-black text-white">
@@ -224,62 +224,62 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={() => setSelectedDaySummary(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Workout Details */}
-            <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <Dumbbell className="w-4 h-4 text-emerald-400" />
+                <Dumbbell className="w-4 h-4 text-amber-400" />
                 <span>Workout Session</span>
               </div>
               {selectedDaySummary.workouts?.length > 0 ? (
                 selectedDaySummary.workouts.map((w: any, idx: number) => (
-                  <div key={idx} className="text-xs text-slate-300">
+                  <div key={idx} className="text-xs text-neutral-300">
                     <div className="font-semibold text-white">{w.dayName}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">
+                    <div className="text-[11px] text-neutral-400 mt-0.5">
                       {w.totalSets} sets • {w.totalVolumeKg?.toLocaleString()} kg volume • ~{w.caloriesBurned} kcal
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-slate-500">Rest day / Active recovery</p>
+                <p className="text-xs text-neutral-500">Rest day / Active recovery</p>
               )}
             </div>
 
             {/* Nutrition Details */}
-            <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <Utensils className="w-4 h-4 text-teal-400" />
+                <Utensils className="w-4 h-4 text-yellow-400" />
                 <span>Nutrition & Macros</span>
               </div>
               {selectedDaySummary.calories > 0 ? (
-                <div className="text-xs text-slate-300">
+                <div className="text-xs text-neutral-300">
                   <span className="font-bold text-white">
                     {Math.round(selectedDaySummary.calories)} kcal consumed
                   </span>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
+                  <div className="text-[11px] text-neutral-400 mt-0.5">
                     Protein: {Math.round(selectedDaySummary.protein)}g
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-slate-500">No meal logs recorded on this date</p>
+                <p className="text-xs text-neutral-500">No meal logs recorded on this date</p>
               )}
             </div>
 
             {/* Steps & Weight */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Steps</span>
-                <div className="text-base font-black text-cyan-400 mt-0.5">
+              <div className="p-3.5 rounded-2xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] uppercase font-bold text-neutral-400">Steps</span>
+                <div className="text-base font-black text-amber-400 mt-0.5">
                   {selectedDaySummary.steps ? `${selectedDaySummary.steps.toLocaleString()}` : '—'}
                 </div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Weigh-in</span>
+              <div className="p-3.5 rounded-2xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] uppercase font-bold text-neutral-400">Weigh-in</span>
                 <div className="text-base font-black text-white mt-0.5">
                   {selectedDaySummary.weight ? `${selectedDaySummary.weight} kg` : '—'}
                 </div>

@@ -33,17 +33,17 @@ export default function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-[#0a0d14] border-r border-slate-800/80 min-h-screen p-5 fixed left-0 top-0 bottom-0 z-40">
+    <aside className="hidden lg:flex flex-col w-64 bg-[#0a0a0a] border-r border-neutral-800/80 min-h-screen p-5 fixed left-0 top-0 bottom-0 z-40">
       {/* Brand Logo */}
       <Link href="/dashboard" className="flex items-center gap-2.5 mb-8 px-2 group">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
           <Dumbbell className="w-5 h-5 text-black" />
         </div>
         <div>
           <span className="text-xl font-black tracking-tight text-white">
-            GYM<span className="text-emerald-400">IN</span>
+            GYM<span className="text-amber-400">IN</span>
           </span>
-          <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest -mt-1">
+          <span className="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest -mt-1">
             Fitness Companion
           </span>
         </div>
@@ -56,7 +56,7 @@ export default function Sidebar({ user }: { user?: any }) {
         </div>
         <div>
           <div className="text-xs font-extrabold text-amber-400">12 Day Streak 🔥</div>
-          <div className="text-[10px] text-slate-400">Keep the momentum going!</div>
+          <div className="text-[10px] text-neutral-400">Keep the momentum going!</div>
         </div>
       </div>
 
@@ -71,11 +71,11 @@ export default function Sidebar({ user }: { user?: any }) {
               href={item.href}
               className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 isActive
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
+                  ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30 shadow-sm shadow-amber-400/10'
+                  : 'text-neutral-400 hover:text-white hover:bg-neutral-900/60'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-neutral-400'}`} />
               <span>{item.label}</span>
             </Link>
           );
@@ -83,15 +83,15 @@ export default function Sidebar({ user }: { user?: any }) {
       </nav>
 
       {/* User Info & Logout */}
-      <div className="pt-4 border-t border-slate-800/80">
+      <div className="pt-4 border-t border-neutral-800/80">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-xs flex-shrink-0">
               {user?.name ? user.name[0].toUpperCase() : 'U'}
             </div>
             <div className="overflow-hidden">
               <div className="text-xs font-bold text-white truncate">{user?.name || 'Athlete'}</div>
-              <div className="text-[10px] text-slate-400 truncate">{user?.email || 'user@gymin.app'}</div>
+              <div className="text-[10px] text-neutral-400 truncate">{user?.email || 'user@gymin.app'}</div>
             </div>
           </div>
 

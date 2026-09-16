@@ -11,7 +11,7 @@ interface AppShellProps {
 
 export default function AppShell({ children, user }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-[#080a0f] text-slate-100 flex">
+    <div className="min-h-screen bg-[#050505] text-neutral-100 flex">
       {/* Desktop Sidebar */}
       <Sidebar user={user} />
 
