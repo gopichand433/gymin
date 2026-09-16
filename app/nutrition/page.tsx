@@ -44,7 +44,7 @@ export default function NutritionPage() {
   // Master Database Explorer State
   const [selectedCountry, setSelectedCountry] = useState<string>('All');
   const [explorerSearch, setExplorerSearch] = useState('');
-  const [explorerDietFilter, setExplorerDietFilter] = useState<'ALL' | 'HIGH_PROTEIN' | 'VEG' | 'LOW_CAL'>('ALL');
+  const [explorerDietFilter, setExplorerDietFilter] = useState<'ALL' | 'ROLLS' | 'HIGH_PROTEIN' | 'VEG' | 'LOW_CAL'>('ALL');
 
   // Add Food Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -192,8 +192,16 @@ export default function NutritionPage() {
   // Modal filtered foods
   const modalFilteredFoods = useMemo(() => {
     return allFoods.filter((f) => {
+      const isRoll =
+        f.category?.toLowerCase().includes('roll') ||
+        f.subcategory?.toLowerCase().includes('roll') ||
+        f.name.toLowerCase().includes('roll') ||
+        f.name.toLowerCase().includes('wrap') ||
+        f.name.toLowerCase().includes('frankie');
+
       const matchesCategory =
         foodCategory === 'ALL' ||
+        (foodCategory === 'ROLLS' && isRoll) ||
         (foodCategory === 'INDIAN' && f.isIndian) ||
         (foodCategory === 'PROTEIN' && f.proteinPer100 >= 10) ||
         f.category?.toUpperCase().includes(foodCategory);
@@ -225,7 +233,14 @@ export default function NutritionPage() {
         f.notes?.toLowerCase().includes(explorerSearch.toLowerCase());
 
       let matchesDiet = true;
-      if (explorerDietFilter === 'HIGH_PROTEIN') {
+      if (explorerDietFilter === 'ROLLS') {
+        matchesDiet =
+          f.category?.toLowerCase().includes('roll') ||
+          f.subcategory?.toLowerCase().includes('roll') ||
+          f.name.toLowerCase().includes('roll') ||
+          f.name.toLowerCase().includes('wrap') ||
+          f.name.toLowerCase().includes('frankie');
+      } else if (explorerDietFilter === 'HIGH_PROTEIN') {
         matchesDiet = f.proteinPer100 >= 12;
       } else if (explorerDietFilter === 'VEG') {
         matchesDiet = f.isVeg;
@@ -580,6 +595,7 @@ export default function NutritionPage() {
                 <div className="flex gap-1.5 overflow-x-auto w-full sm:w-auto scrollbar-none">
                   {[
                     { id: 'ALL', label: 'All Dishes' },
+                    { id: 'ROLLS', label: '🌯 Rolls & Wraps' },
                     { id: 'HIGH_PROTEIN', label: '⚡ High Protein (≥12g)' },
                     { id: 'VEG', label: '🌱 Vegetarian' },
                     { id: 'LOW_CAL', label: '🔥 Under 150 kcal' },
@@ -760,6 +776,7 @@ export default function NutritionPage() {
               <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 {[
                   { id: 'ALL', label: 'All Foods' },
+                  { id: 'ROLLS', label: '🌯 Rolls & Wraps' },
                   { id: 'INDIAN', label: '🇮🇳 Indian' },
                   { id: 'PROTEIN', label: '⚡ High Protein' },
                   { id: 'CARBOHYDRATES', label: '🍚 Carbs' },
