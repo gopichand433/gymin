@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Dumbbell,
@@ -31,6 +32,48 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [streak, setStreak] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<any>(user || null);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/dashboard')
+      .then((res) => {
+        if (res.ok) return res.json();
+        return null;
+      })
+      .then((data) => {
+        if (data) {
+          if (typeof data.streakDays === 'number') {
+            setStreak(data.streakDays);
+          }
+          if (data.userName) {
+            setCurrentUser((prev: any) => ({
+              ...prev,
+              name: data.userName,
+              email: prev?.email || `${data.userName.toLowerCase().replace(/\s+/g, '')}@gymin.app`,
+            }));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      window.location.href = '/auth/login';
+    }
+  };
+
+  const displayName = currentUser?.name || user?.name || 'Athlete';
+  const displayEmail = currentUser?.email || user?.email || 'user@gymin.app';
 
   return (
     <aside className="hidden lg:flex flex-col w-64 bg-[#0a0a0a] border-r border-neutral-800/80 min-h-screen p-5 fixed left-0 top-0 bottom-0 z-40">
@@ -55,8 +98,10 @@ export default function Sidebar({ user }: { user?: any }) {
           <Flame className="w-4 h-4 fill-amber-400" />
         </div>
         <div>
-          <div className="text-xs font-extrabold text-amber-400">12 Day Streak 🔥</div>
-          <div className="text-[10px] text-neutral-400">Keep the momentum going!</div>
+          <div className="text-xs font-extrabold text-amber-400">{streak} Day Streak 🔥</div>
+          <div className="text-[10px] text-neutral-400">
+            {streak > 0 ? 'Keep the momentum going!' : 'Start your streak today!'}
+          </div>
         </div>
       </div>
 
@@ -87,23 +132,23 @@ export default function Sidebar({ user }: { user?: any }) {
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-xs flex-shrink-0">
-              {user?.name ? user.name[0].toUpperCase() : 'U'}
+              {displayName ? displayName[0].toUpperCase() : 'A'}
             </div>
             <div className="overflow-hidden">
-              <div className="text-xs font-bold text-white truncate">{user?.name || 'Athlete'}</div>
-              <div className="text-[10px] text-neutral-400 truncate">{user?.email || 'user@gymin.app'}</div>
+              <div className="text-xs font-bold text-white truncate">{displayName}</div>
+              <div className="text-[10px] text-neutral-400 truncate">{displayEmail}</div>
             </div>
           </div>
 
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              title="Logout"
-              className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            title="Logout"
+            className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>

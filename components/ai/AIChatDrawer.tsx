@@ -228,7 +228,7 @@ export default function AIChatDrawer() {
                         </span>
                         <span className="text-amber-400 font-bold flex items-center gap-1">
                           <Flame className="w-3.5 h-3.5 fill-amber-400" />
-                          {msg.cardData?.streak || 12}d Streak
+                          {msg.cardData?.streak ?? 0}d Streak
                         </span>
                       </div>
                       <Link

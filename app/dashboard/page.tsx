@@ -40,8 +40,8 @@ export default function DashboardPage() {
     setWaterMl((prev) => Math.min(prev + 250, 5000));
   };
 
-  const userName = data?.userName || 'Alex';
-  const streak = data?.streakDays || 12;
+  const userName = data?.userName || 'Athlete';
+  const streak = data?.streakDays ?? 0;
   const workout = data?.todayWorkout || {
     dayName: 'Chest + Triceps',
     exerciseCount: 5,
@@ -89,7 +89,7 @@ export default function DashboardPage() {
                 <span className="text-amber-400">🔥</span>
               </div>
               <div className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider">
-                Workout & Habit Consistency
+                {streak > 0 ? 'Workout & Habit Consistency' : 'Start your streak today!'}
               </div>
             </div>
           </div>
@@ -316,7 +316,9 @@ export default function DashboardPage() {
                 <Sparkles className="w-4 h-4 text-amber-400" />
               </div>
               <p className="text-xs text-neutral-300 leading-relaxed mt-2">
-                "Alex, you're on a 12-day streak! You've logged 105g of protein so far today. A high-protein dinner like chicken breast or paneer curry will easily close out your macros."
+                {streak > 0
+                  ? `"${userName}, you're on a ${streak}-day active streak! You've logged ${nutrition.protein}g of protein so far today. Keep up the solid momentum."`
+                  : `"${userName}, welcome to your personal workout journey! Complete your session today to start your consistency streak."`}
               </p>
             </div>
 

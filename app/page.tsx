@@ -137,7 +137,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
                 <Flame className="w-4 h-4 fill-amber-400" />
-                <span>12 Day Consistency Streak</span>
+                <span>Daily Consistency Streak</span>
               </div>
             </div>
 

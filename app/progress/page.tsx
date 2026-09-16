@@ -90,8 +90,10 @@ export default function ProgressPage() {
               <span>Consistency</span>
               <Flame className="w-4 h-4 text-amber-400" />
             </div>
-            <div className="text-2xl font-black text-white">{stats.streakDays || 12} Days</div>
-            <span className="text-[10px] text-amber-400 font-bold">Unbroken Streak 🔥</span>
+            <div className="text-2xl font-black text-white">{stats.streakDays ?? 0} Days</div>
+            <span className="text-[10px] text-amber-400 font-bold">
+              {stats.streakDays > 0 ? 'Unbroken Streak 🔥' : 'Start your streak!'}
+            </span>
           </div>
 
           <div className="p-5 rounded-3xl bg-[#0a0a0a] border border-neutral-800 shadow-xl">
@@ -99,7 +101,7 @@ export default function ProgressPage() {
               <span>Total Workouts</span>
               <Dumbbell className="w-4 h-4 text-amber-400" />
             </div>
-            <div className="text-2xl font-black text-white">{stats.totalSessions || 8}</div>
+            <div className="text-2xl font-black text-white">{stats.totalSessions ?? 0}</div>
             <span className="text-[10px] text-amber-400 font-bold">Sessions Logged</span>
           </div>
 

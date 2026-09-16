@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import { calculateUserStreak } from '@/lib/auth';
 
 export interface UserFitnessContext {
   userName: string;
@@ -144,7 +145,7 @@ export async function getUserFitnessContext(userId: string): Promise<UserFitness
 
     todaySteps: stepLog?.steps ?? 0,
     stepTarget: profile?.stepTarget || 10000,
-    streakDays: 12, // consistent streak
+    streakDays: await calculateUserStreak(userId),
 
     personalRecords,
   };

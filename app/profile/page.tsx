@@ -21,7 +21,20 @@ export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+
+  const handleLogout = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      window.location.href = '/auth/login';
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -104,15 +117,15 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs font-bold transition-colors flex items-center gap-1.5"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Log Out</span>
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="px-4 py-2 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>{loggingOut ? 'Logging out...' : 'Log Out'}</span>
+          </button>
         </div>
 
         {successMsg && (

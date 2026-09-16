@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { getSession, calculateUserStreak } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -83,9 +83,12 @@ export async function GET() {
       take: 3,
     });
 
+    // 7. Dynamic unbroken streak calculation
+    const streakDays = await calculateUserStreak(session.userId);
+
     return NextResponse.json({
       userName: user?.name || 'Athlete',
-      streakDays: 12,
+      streakDays,
       todayWorkout: {
         dayName: todayDay?.name || 'Chest & Triceps',
         exerciseCount: todayDay?.exercises?.length || 6,
