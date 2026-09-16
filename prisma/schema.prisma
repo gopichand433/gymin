@@ -201,8 +201,9 @@ model PersonalRecord {
 model Food {
   id              String    @id @default(cuid())
   name            String
-  category        String    // Protein, Carbohydrates, Fruits, Vegetables, Indian Dishes, Snacks, Beverages, Dairy
+  category        String    // Protein, Carbohydrates, Fruits, Vegetables, Indian Dishes, International Dishes, Snacks, Beverages, Dairy, Fats
   subcategory     String?
+  country         String?   @default("Global") // India, USA, Italy, Mexico, Japan, China, Greece, Thailand, Korea, Middle East, France, Spain, UK, Germany, Brazil, Vietnam, Global
   caloriesPer100  Float
   proteinPer100   Float
   carbsPer100     Float
@@ -219,6 +220,7 @@ model Food {
   @@index([name])
   @@index([category])
   @@index([isIndian])
+  @@index([country])
 }
 
 model NutritionLog {

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { MASTER_FOODS } from '../lib/nutrition/master-foods-data';
 
 const prisma = new PrismaClient();
 
@@ -2116,10 +2117,28 @@ async function main() {
     },
   ];
 
-  for (const food of foodData) {
+  for (const food of MASTER_FOODS) {
     const existing = await prisma.food.findFirst({ where: { name: food.name } });
     if (!existing) {
       await prisma.food.create({ data: food });
+    } else {
+      await prisma.food.update({
+        where: { id: existing.id },
+        data: {
+          category: food.category,
+          subcategory: food.subcategory,
+          country: food.country,
+          caloriesPer100: food.caloriesPer100,
+          proteinPer100: food.proteinPer100,
+          carbsPer100: food.carbsPer100,
+          fatPer100: food.fatPer100,
+          fiberPer100: food.fiberPer100,
+          servingUnits: food.servingUnits,
+          isIndian: food.isIndian,
+          isVeg: food.isVeg,
+          notes: food.notes,
+        },
+      });
     }
   }
 
