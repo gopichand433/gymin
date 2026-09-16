@@ -61,6 +61,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
+      provider: aiResponse.provider,
       message: {
         id: savedAssistantMsg.id,
         role: 'assistant',
@@ -86,6 +87,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const activeProvider = process.env.GEMINI_API_KEY?.trim()
+      ? 'gemini'
+      : process.env.OPENAI_API_KEY?.trim()
+      ? 'openai'
+      : 'analytical';
+
     const conversation = await prisma.aIConversation.findFirst({
       where: { userId: session.userId },
       include: {
@@ -97,6 +104,7 @@ export async function GET() {
     });
 
     return NextResponse.json({
+      activeProvider,
       conversationId: conversation?.id || null,
       messages:
         conversation?.messages.map((m) => ({

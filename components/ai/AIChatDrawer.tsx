@@ -28,6 +28,7 @@ export default function AIChatDrawer() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
+  const [provider, setProvider] = useState<'gemini' | 'openai' | 'analytical'>('analytical');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedPrompts = [
@@ -44,6 +45,9 @@ export default function AIChatDrawer() {
     fetch('/api/ai/chat')
       .then((res) => res.json())
       .then((data) => {
+        if (data?.activeProvider) {
+          setProvider(data.activeProvider);
+        }
         if (data?.messages && data.messages.length > 0) {
           setMessages(data.messages);
         } else {
@@ -94,6 +98,10 @@ export default function AIChatDrawer() {
         throw new Error(data.error || 'Failed to get response');
       }
 
+      if (data.provider) {
+        setProvider(data.provider);
+      }
+
       setMessages((prev) => [...prev, data.message]);
     } catch (err: any) {
       setMessages((prev) => [
@@ -110,17 +118,15 @@ export default function AIChatDrawer() {
 
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Floating Trigger Button */}
       <button
-        type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 lg:bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-black font-extrabold text-sm shadow-xl shadow-amber-500/30 hover:scale-105 transition-all group"
+        className="fixed bottom-20 lg:bottom-6 right-6 z-40 px-4 py-3 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-black font-extrabold text-xs shadow-xl shadow-amber-500/25 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
       >
         <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
           <Bot className="w-4 h-4 text-black" />
         </div>
         <span>Ask Gymin AI</span>
-        <span className="w-2 h-2 rounded-full bg-black animate-ping" />
       </button>
 
       {/* Slide-out Drawer */}
@@ -136,8 +142,21 @@ export default function AIChatDrawer() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-extrabold text-sm text-white">GYMIN AI</h3>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400/20 text-amber-400">
-                      Live Grounded
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400/20 text-amber-400 flex items-center gap-1">
+                      {provider === 'gemini' ? (
+                        <>
+                          <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                          <span>Gemini 2.5 Flash</span>
+                        </>
+                      ) : provider === 'openai' ? (
+                        <>
+                          <span>🤖 ChatGPT</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>⚡ Grounded Coach</span>
+                        </>
+                      )}
                     </span>
                   </div>
                   <p className="text-[11px] text-neutral-400">

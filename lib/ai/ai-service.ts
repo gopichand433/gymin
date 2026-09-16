@@ -5,96 +5,182 @@ export interface AIResponse {
   text: string;
   cardType?: 'WORKOUT_CARD' | 'NUTRITION_CARD' | 'PROGRESS_CARD' | null;
   cardData?: any;
+  provider?: 'gemini' | 'openai' | 'analytical';
 }
 
-export async function generateGyminAIResponse(
-  userQuery: string,
-  context: UserFitnessContext
-): Promise<AIResponse> {
-  const apiKey = process.env.GEMINI_API_KEY;
+function buildSystemPrompt(context: UserFitnessContext): string {
+  return `You are GYMIN AI, a world-class personal fitness coach and nutrition consultant dedicated to helping ${context.userName}.
+Tone: Energetic, motivating, supportive, scientifically grounded, concise, and direct.
+Strict Grounding Rule: You must NEVER hallucinate or invent personal metrics. Use only the exact statistics provided below. If a user asks about unrecorded metrics, politely advise them that it hasn't been logged yet today.
 
-  // If Gemini API Key is available, use official GoogleGenAI SDK
-  if (apiKey && apiKey.trim() !== '') {
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-
-      const systemPrompt = `You are GYMIN AI, a personal fitness companion, trainer, and nutrition coach for ${context.userName}.
-Tone: Friendly, motivating, supportive, knowledgeable, concise, encouraging.
-Strict Grounding Rule: You must NEVER invent or hallucinate user-specific data. Only quote the exact statistics provided below. If a user asks about data that has not been logged yet, politely let them know they haven't logged it today.
-
-CURRENT USER CONTEXT (REAL DATABASE STATS):
-- Name: ${context.userName}
-- Goal: ${context.goal} (${context.experience} level)
-- Weight: ${context.weightKg} kg, Height: ${context.heightCm} cm
+CURRENT ATHLETE CONTEXT (FROM REAL DATABASE RECORDS):
+- Athlete Name: ${context.userName}
+- Primary Fitness Goal: ${context.goal.replace(/_/g, ' ')} (${context.experience} level)
+- Biometrics: Weight ${context.weightKg} kg, Height ${context.heightCm} cm
 - Daily Calorie Target: ${context.calorieTarget} kcal
 - Daily Protein Target: ${context.proteinTarget} g
 - Today's Nutrition Consumed: ${context.todayCalories} kcal (${context.remainingCalories} kcal remaining)
 - Today's Protein Consumed: ${context.todayProtein} g (${context.remainingProtein} g remaining)
 - Today's Carbs Consumed: ${context.todayCarbs} g / ${context.carbsTarget} g
 - Today's Fat Consumed: ${context.todayFat} g / ${context.fatTarget} g
-- Foods logged today: ${context.todayFoodsLogged.length > 0 ? context.todayFoodsLogged.join(', ') : 'None yet'}
+- Foods Logged Today: ${context.todayFoodsLogged.length > 0 ? context.todayFoodsLogged.join(', ') : 'None yet today'}
 - Today's Scheduled Workout: ${context.todayWorkoutName} (${context.todayExercises.length} exercises: ${context.todayExercises.map((e) => e.name).join(', ')})
-- Today's Steps: ${context.todaySteps} / ${context.stepTarget} steps
-- Consistency Streak: ${context.streakDays} days
-- Personal Records: ${context.personalRecords.map((pr) => `${pr.exercise}: ${pr.maxWeightKg}kg x ${pr.maxReps}`).join(', ')}
+- Steps Tracked Today: ${context.todaySteps} / ${context.stepTarget} steps
+- Unbroken Habit Streak: ${context.streakDays} days
+- Personal Records: ${context.personalRecords.length > 0 ? context.personalRecords.map((pr) => `${pr.exercise}: ${pr.maxWeightKg}kg x ${pr.maxReps}`).join(', ') : 'Benchmark records established'}
 
 SAFETY GUIDELINES:
-- Never diagnose medical conditions or prescribe medications or steroids.
-- Do not promote extreme starvation or unsafe rapid weight loss.
-- Recommend speaking to a healthcare professional for injuries or medical pain.
+- Never diagnose medical injuries, prescribe medications, or endorse anabolic substances.
+- Emphasize progressive overload, proper form, controlled eccentrics, and adequate protein.
+- Recommend consulting a physician for joint or acute medical pain.`;
+}
 
-If the user asks about their workout today, mention the exercises and you may trigger the workout card.
-If the user asks about nutrition, calories, or protein, provide exact numbers and remaining targets.`;
+function detectCard(userQuery: string, context: UserFitnessContext): { cardType: AIResponse['cardType']; cardData: any } {
+  const q = userQuery.toLowerCase();
+  if (q.includes('workout') || q.includes('train') || q.includes('exercise') || q.includes('split') || q.includes('gym')) {
+    return {
+      cardType: 'WORKOUT_CARD',
+      cardData: {
+        dayName: context.todayWorkoutName,
+        exerciseCount: context.todayExercises.length,
+        durationMin: 55,
+        exercises: context.todayExercises,
+      },
+    };
+  }
+  if (q.includes('food') || q.includes('protein') || q.includes('calorie') || q.includes('eat') || q.includes('dinner') || q.includes('lunch') || q.includes('macro') || q.includes('meal')) {
+    return {
+      cardType: 'NUTRITION_CARD',
+      cardData: {
+        calories: context.todayCalories,
+        targetCalories: context.calorieTarget,
+        protein: context.todayProtein,
+        targetProtein: context.proteinTarget,
+        remainingCalories: context.remainingCalories,
+        remainingProtein: context.remainingProtein,
+      },
+    };
+  }
+  if (q.includes('progress') || q.includes('pr') || q.includes('bench press') || q.includes('streak') || q.includes('record') || q.includes('gains')) {
+    return {
+      cardType: 'PROGRESS_CARD',
+      cardData: {
+        streak: context.streakDays,
+        recentPRs: context.personalRecords,
+        completedWorkouts: context.recentWorkoutsCompleted,
+      },
+    };
+  }
+  return { cardType: null, cardData: null };
+}
 
+async function callGemini(apiKey: string, query: string, context: UserFitnessContext): Promise<string> {
+  const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+  const systemPrompt = buildSystemPrompt(context);
+  const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+
+  for (const model of models) {
+    try {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-          { role: 'user', parts: [{ text: `${systemPrompt}\n\nUser Question: ${userQuery}` }] },
-        ],
+        model,
+        contents: query,
+        config: {
+          systemInstruction: systemPrompt,
+          temperature: 0.7,
+        },
       });
 
-      const text = response.text || "I'm right here with you! Let me check your fitness stats.";
-
-      // Detect if structured card should be attached
-      let cardType: AIResponse['cardType'] = null;
-      let cardData: any = null;
-
-      const lowerQuery = userQuery.toLowerCase();
-      if (lowerQuery.includes('workout') || lowerQuery.includes('train') || lowerQuery.includes('exercise')) {
-        cardType = 'WORKOUT_CARD';
-        cardData = {
-          dayName: context.todayWorkoutName,
-          exerciseCount: context.todayExercises.length,
-          durationMin: 55,
-          exercises: context.todayExercises,
-        };
-      } else if (lowerQuery.includes('food') || lowerQuery.includes('protein') || lowerQuery.includes('calorie') || lowerQuery.includes('eat') || lowerQuery.includes('dinner')) {
-        cardType = 'NUTRITION_CARD';
-        cardData = {
-          calories: context.todayCalories,
-          targetCalories: context.calorieTarget,
-          protein: context.todayProtein,
-          targetProtein: context.proteinTarget,
-          remainingCalories: context.remainingCalories,
-          remainingProtein: context.remainingProtein,
-        };
-      } else if (lowerQuery.includes('progress') || lowerQuery.includes('pr') || lowerQuery.includes('bench press') || lowerQuery.includes('streak')) {
-        cardType = 'PROGRESS_CARD';
-        cardData = {
-          streak: context.streakDays,
-          recentPRs: context.personalRecords,
-          completedWorkouts: context.recentWorkoutsCompleted,
-        };
+      if (response.text && response.text.trim()) {
+        return response.text.trim();
       }
-
-      return { text, cardType, cardData };
-    } catch (apiError) {
-      console.warn('Gemini API call failed, falling back to grounded analytical engine:', apiError);
+    } catch {
+      continue;
     }
   }
 
-  // Grounded Analytical Context Engine (Zero-config out of the box fallback)
-  return generateGroundedAnalyticalResponse(userQuery, context);
+  throw new Error('All Gemini model candidates failed');
+}
+
+async function callChatGPT(apiKey: string, query: string, context: UserFitnessContext): Promise<string> {
+  const systemPrompt = buildSystemPrompt(context);
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey.trim()}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: query },
+      ],
+      temperature: 0.7,
+      max_tokens: 650,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`OpenAI HTTP ${res.status}: ${errorBody}`);
+  }
+
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) {
+    throw new Error('No content returned by OpenAI');
+  }
+
+  return text.trim();
+}
+
+export async function generateGyminAIResponse(
+  userQuery: string,
+  context: UserFitnessContext
+): Promise<AIResponse> {
+  const geminiKey = process.env.GEMINI_API_KEY?.trim();
+  const openAIKey = process.env.OPENAI_API_KEY?.trim();
+  const preferredProvider = process.env.AI_PROVIDER?.toLowerCase().trim();
+
+  // 1. If user explicitly requests OpenAI or only OpenAI key is present
+  if (preferredProvider === 'openai' || (!geminiKey && openAIKey)) {
+    if (openAIKey) {
+      try {
+        const text = await callChatGPT(openAIKey, userQuery, context);
+        const { cardType, cardData } = detectCard(userQuery, context);
+        return { text, cardType, cardData, provider: 'openai' };
+      } catch (err) {
+        console.warn('ChatGPT API call failed, attempting fallback:', err);
+      }
+    }
+  }
+
+  // 2. Try Google Gemini
+  if (geminiKey) {
+    try {
+      const text = await callGemini(geminiKey, userQuery, context);
+      const { cardType, cardData } = detectCard(userQuery, context);
+      return { text, cardType, cardData, provider: 'gemini' };
+    } catch (err) {
+      console.warn('Gemini API call failed, attempting fallback:', err);
+    }
+  }
+
+  // 3. Fallback to OpenAI if Gemini failed and OpenAI key exists
+  if (openAIKey) {
+    try {
+      const text = await callChatGPT(openAIKey, userQuery, context);
+      const { cardType, cardData } = detectCard(userQuery, context);
+      return { text, cardType, cardData, provider: 'openai' };
+    } catch (err) {
+      console.warn('OpenAI fallback also failed:', err);
+    }
+  }
+
+  // 4. Zero-config Grounded Analytical Engine Fallback
+  const analytical = generateGroundedAnalyticalResponse(userQuery, context);
+  return { ...analytical, provider: 'analytical' };
 }
 
 /**
