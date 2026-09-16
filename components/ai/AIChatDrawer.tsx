@@ -146,8 +146,12 @@ export default function AIChatDrawer() {
 
   const handleSaveKey = () => {
     if (typeof window !== 'undefined') {
-      if (customApiKey.trim()) {
-        localStorage.setItem('gymin_custom_ai_key', customApiKey.trim());
+      let cleaned = customApiKey.trim();
+      cleaned = cleaned.replace(/^["']|["']$/g, '').trim();
+      cleaned = cleaned.replace(/^(GEMINI_API_KEY|OPENAI_API_KEY|API_KEY)[:=]\s*/i, '').trim();
+      setCustomApiKey(cleaned);
+      if (cleaned) {
+        localStorage.setItem('gymin_custom_ai_key', cleaned);
       } else {
         localStorage.removeItem('gymin_custom_ai_key');
       }
@@ -173,9 +177,14 @@ export default function AIChatDrawer() {
     setLoading(true);
 
     try {
-      const activeKey =
+      const rawKey =
         customApiKey.trim() ||
         (typeof window !== 'undefined' ? localStorage.getItem('gymin_custom_ai_key') : null);
+      const activeKey = rawKey
+        ?.trim()
+        .replace(/^["']|["']$/g, '')
+        .replace(/^(GEMINI_API_KEY|OPENAI_API_KEY|API_KEY)[:=]\s*/i, '')
+        .trim();
 
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -189,7 +198,7 @@ export default function AIChatDrawer() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error(data.error || `Server responded with status ${res.status}`);
       }
 
       if (data.provider) {
@@ -198,11 +207,24 @@ export default function AIChatDrawer() {
 
       setMessages((prev) => [...prev, data.message]);
     } catch (err: any) {
+      const errMsg = err?.message || '';
+      let displayContent =
+        'Sorry, I encountered an issue communicating with the AI service. Please verify your connection and try again.';
+      if (errMsg.includes('Session expired') || errMsg.includes('Unauthorized')) {
+        displayContent =
+          '🔒 **Session Expired:** Please refresh or log in again to consult GYMIN AI.';
+      } else if (errMsg.includes('API_KEY_INVALID') || errMsg.includes('API key')) {
+        displayContent =
+          '⚠️ **API Key Error:** The Gemini API key entered appears to be invalid. Please verify your key at [Google AI Studio](https://aistudio.google.com/app/apikey).';
+      } else if (errMsg) {
+        displayContent = `⚠️ **Notice:** ${errMsg}`;
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: "Sorry, I encountered an issue communicating with the AI service. Please verify your connection or API key and try again.",
+          content: displayContent,
         },
       ]);
     } finally {

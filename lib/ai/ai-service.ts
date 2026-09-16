@@ -74,14 +74,30 @@ function detectCard(userQuery: string, context: UserFitnessContext): { cardType:
   return { cardType: null, cardData: null };
 }
 
+function sanitizeApiKey(key?: string): string | undefined {
+  if (!key) return undefined;
+  let cleaned = key.trim();
+  cleaned = cleaned.replace(/^["']|["']$/g, '').trim();
+  cleaned = cleaned.replace(/^(GEMINI_API_KEY|OPENAI_API_KEY|API_KEY)[:=]\s*/i, '').trim();
+  return cleaned || undefined;
+}
+
 async function callGemini(
   apiKey: string,
   query: string,
   context: UserFitnessContext
 ): Promise<{ text: string }> {
-  const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+  const cleanKey = sanitizeApiKey(apiKey);
+  if (!cleanKey) {
+    throw new Error('API_KEY_INVALID: API key is empty');
+  }
+
+  const ai = new GoogleGenAI({ apiKey: cleanKey });
   const systemPrompt = buildSystemPrompt(context);
-  const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+  // gemini-2.0-flash is universally available and has full Google Search tool support
+  const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+
+  let lastError: any = null;
 
   for (const model of models) {
     // Attempt 1: With Google Search Grounding for live online browsing
@@ -98,13 +114,19 @@ async function callGemini(
 
       let text = response.text?.trim();
       if (text) {
-        // Extract real-time web sources from grounding metadata
+        // Extract real-time web sources from grounding metadata safely
         const metadata = response.candidates?.[0]?.groundingMetadata;
         if (metadata?.groundingChunks && metadata.groundingChunks.length > 0) {
           const links: string[] = [];
           for (const chunk of metadata.groundingChunks) {
             if (chunk.web?.uri) {
-              const title = chunk.web.title || new URL(chunk.web.uri).hostname;
+              let domain = chunk.web.uri;
+              try {
+                domain = new URL(chunk.web.uri).hostname;
+              } catch {
+                // Keep raw uri if URL parsing fails
+              }
+              const title = chunk.web.title || domain;
               links.push(`• [${title}](${chunk.web.uri})`);
             }
           }
@@ -115,8 +137,14 @@ async function callGemini(
         }
         return { text };
       }
-    } catch (searchError) {
-      console.warn(`Gemini search grounding on ${model} failed, attempting standard generation:`, searchError);
+    } catch (searchError: any) {
+      lastError = searchError;
+      const msg = searchError?.message || '';
+      // If the API key is completely invalid, don't waste time retrying
+      if (msg.includes('API_KEY_INVALID') || msg.includes('API key not valid')) {
+        throw new Error('API_KEY_INVALID: The provided Gemini API key is invalid or unauthorized.');
+      }
+      console.warn(`Gemini search grounding on ${model} failed, attempting standard generation:`, msg);
     }
 
     // Attempt 2: Standard generation without search grounding fallback
@@ -133,23 +161,33 @@ async function callGemini(
       if (response.text?.trim()) {
         return { text: response.text.trim() };
       }
-    } catch (genError) {
-      console.warn(`Gemini generation on ${model} failed:`, genError);
+    } catch (genError: any) {
+      lastError = genError;
+      const msg = genError?.message || '';
+      if (msg.includes('API_KEY_INVALID') || msg.includes('API key not valid')) {
+        throw new Error('API_KEY_INVALID: The provided Gemini API key is invalid or unauthorized.');
+      }
+      console.warn(`Gemini generation on ${model} failed:`, msg);
       continue;
     }
   }
 
-  throw new Error('All Gemini model candidates failed');
+  throw lastError || new Error('All Gemini model candidates failed');
 }
 
 async function callChatGPT(apiKey: string, query: string, context: UserFitnessContext): Promise<string> {
+  const cleanKey = sanitizeApiKey(apiKey);
+  if (!cleanKey) {
+    throw new Error('OpenAI API key is empty');
+  }
+
   const systemPrompt = buildSystemPrompt(context);
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey.trim()}`,
+      Authorization: `Bearer ${cleanKey}`,
     },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
@@ -181,11 +219,13 @@ export async function generateGyminAIResponse(
   context: UserFitnessContext,
   customApiKey?: string
 ): Promise<AIResponse> {
-  const cleanCustomKey = customApiKey?.trim();
+  const cleanCustomKey = sanitizeApiKey(customApiKey);
   const isCustomOpenAI = cleanCustomKey ? cleanCustomKey.startsWith('sk-') : false;
-  const geminiKey = (!isCustomOpenAI && cleanCustomKey ? cleanCustomKey : process.env.GEMINI_API_KEY)?.trim();
-  const openAIKey = (isCustomOpenAI && cleanCustomKey ? cleanCustomKey : process.env.OPENAI_API_KEY)?.trim();
+  const geminiKey = (!isCustomOpenAI && cleanCustomKey ? cleanCustomKey : sanitizeApiKey(process.env.GEMINI_API_KEY))?.trim();
+  const openAIKey = (isCustomOpenAI && cleanCustomKey ? cleanCustomKey : sanitizeApiKey(process.env.OPENAI_API_KEY))?.trim();
   const preferredProvider = process.env.AI_PROVIDER?.toLowerCase().trim();
+
+  let noticePrefix: string | null = null;
 
   // 1. If user explicitly requests OpenAI or only OpenAI key is present
   if (preferredProvider === 'openai' || (!geminiKey && openAIKey)) {
@@ -194,8 +234,9 @@ export async function generateGyminAIResponse(
         const text = await callChatGPT(openAIKey, userQuery, context);
         const { cardType, cardData } = detectCard(userQuery, context);
         return { text, cardType, cardData, provider: 'openai' };
-      } catch (err) {
+      } catch (err: any) {
         console.warn('ChatGPT API call failed, attempting fallback:', err);
+        noticePrefix = `> ⚠️ **OpenAI Key Issue:** ${err?.message || 'API call failed'}. Answering via built-in Sports Science Coach:\n\n`;
       }
     }
   }
@@ -206,25 +247,37 @@ export async function generateGyminAIResponse(
       const result = await callGemini(geminiKey, userQuery, context);
       const { cardType, cardData } = detectCard(userQuery, context);
       return { text: result.text, cardType, cardData, provider: 'gemini' };
-    } catch (err) {
+    } catch (err: any) {
       console.warn('Gemini API call failed, attempting fallback:', err);
+      const errMsg = err?.message || '';
+      if (errMsg.includes('API_KEY_INVALID')) {
+        noticePrefix = `> ⚠️ **Gemini Key Notice:** The API key entered is invalid or expired. You can get a free key at [Google AI Studio](https://aistudio.google.com/app/apikey). Answering via built-in Sports Science Coach:\n\n`;
+      } else if (errMsg.includes('RESOURCE_EXHAUSTED') || errMsg.includes('429')) {
+        noticePrefix = `> ⚠️ **Gemini Rate Limit:** Your API quota was exceeded. Answering via built-in Sports Science Coach:\n\n`;
+      } else {
+        noticePrefix = `> ⚠️ **Live Search Notice:** Temporary connection issue with live search. Answering via built-in Sports Science Coach:\n\n`;
+      }
     }
   }
 
   // 3. Fallback to OpenAI if Gemini failed and OpenAI key exists
-  if (openAIKey) {
+  if (openAIKey && !noticePrefix?.includes('OpenAI')) {
     try {
       const text = await callChatGPT(openAIKey, userQuery, context);
       const { cardType, cardData } = detectCard(userQuery, context);
       return { text, cardType, cardData, provider: 'openai' };
     } catch (err) {
-      console.warn('OpenAI fallback also failed:', err);
+      console.warn('Fallback ChatGPT API call failed:', err);
     }
   }
 
   // 4. Zero-config Grounded Analytical Knowledge Engine
   const analytical = generateGroundedAnalyticalResponse(userQuery, context);
-  return { ...analytical, provider: 'analytical' };
+  return {
+    ...analytical,
+    text: (noticePrefix || '') + analytical.text,
+    provider: 'analytical',
+  };
 }
 
 /**

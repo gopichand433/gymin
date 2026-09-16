@@ -8,7 +8,10 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Session expired. Please log in again to consult GYMIN AI.' },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
@@ -28,57 +31,67 @@ export async function POST(request: Request) {
       typeof customApiKey === 'string' ? customApiKey : undefined
     );
 
-    // 3. Persist to database
-    let conversation = await prisma.aIConversation.findFirst({
-      where: { userId: session.userId },
-      orderBy: { updatedAt: 'desc' },
-    });
+    // 3. Persist to database (best-effort; non-blocking for response)
+    let savedMsgId = 'msg_' + Date.now();
+    let savedCreatedAt = new Date();
 
-    if (!conversation) {
-      conversation = await prisma.aIConversation.create({
+    try {
+      let conversation = await prisma.aIConversation.findFirst({
+        where: { userId: session.userId },
+        orderBy: { updatedAt: 'desc' },
+      });
+
+      if (!conversation) {
+        conversation = await prisma.aIConversation.create({
+          data: {
+            userId: session.userId,
+            title: 'GYMIN AI Fitness Consultation',
+          },
+        });
+      }
+
+      // Save user message
+      await prisma.aIMessage.create({
         data: {
-          userId: session.userId,
-          title: 'GYMIN AI Fitness Consultation',
+          conversationId: conversation.id,
+          role: 'user',
+          content: message.trim(),
         },
       });
+
+      // Save assistant message
+      const savedAssistantMsg = await prisma.aIMessage.create({
+        data: {
+          conversationId: conversation.id,
+          role: 'assistant',
+          content: aiResponse.text,
+          cardType: aiResponse.cardType,
+          cardData: aiResponse.cardData ? JSON.stringify(aiResponse.cardData) : null,
+        },
+      });
+
+      savedMsgId = savedAssistantMsg.id;
+      savedCreatedAt = savedAssistantMsg.createdAt;
+    } catch (dbErr) {
+      console.warn('Failed to persist AI chat message to database:', dbErr);
     }
-
-    // Save user message
-    await prisma.aIMessage.create({
-      data: {
-        conversationId: conversation.id,
-        role: 'user',
-        content: message.trim(),
-      },
-    });
-
-    // Save assistant message
-    const savedAssistantMsg = await prisma.aIMessage.create({
-      data: {
-        conversationId: conversation.id,
-        role: 'assistant',
-        content: aiResponse.text,
-        cardType: aiResponse.cardType,
-        cardData: aiResponse.cardData ? JSON.stringify(aiResponse.cardData) : null,
-      },
-    });
 
     return NextResponse.json({
       success: true,
       provider: aiResponse.provider,
       message: {
-        id: savedAssistantMsg.id,
+        id: savedMsgId,
         role: 'assistant',
         content: aiResponse.text,
         cardType: aiResponse.cardType,
         cardData: aiResponse.cardData,
-        createdAt: savedAssistantMsg.createdAt,
+        createdAt: savedCreatedAt,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI chat endpoint error:', error);
     return NextResponse.json(
-      { error: 'Failed to process AI chat message.' },
+      { error: error?.message || 'Failed to process AI chat message.' },
       { status: 500 }
     );
   }
