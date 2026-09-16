@@ -74,12 +74,52 @@ function detectCard(userQuery: string, context: UserFitnessContext): { cardType:
   return { cardType: null, cardData: null };
 }
 
-async function callGemini(apiKey: string, query: string, context: UserFitnessContext): Promise<string> {
+async function callGemini(
+  apiKey: string,
+  query: string,
+  context: UserFitnessContext
+): Promise<{ text: string }> {
   const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
   const systemPrompt = buildSystemPrompt(context);
   const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
 
   for (const model of models) {
+    // Attempt 1: With Google Search Grounding for live online browsing
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: query,
+        config: {
+          systemInstruction: systemPrompt,
+          temperature: 0.7,
+          tools: [{ googleSearch: {} }],
+        },
+      });
+
+      let text = response.text?.trim();
+      if (text) {
+        // Extract real-time web sources from grounding metadata
+        const metadata = response.candidates?.[0]?.groundingMetadata;
+        if (metadata?.groundingChunks && metadata.groundingChunks.length > 0) {
+          const links: string[] = [];
+          for (const chunk of metadata.groundingChunks) {
+            if (chunk.web?.uri) {
+              const title = chunk.web.title || new URL(chunk.web.uri).hostname;
+              links.push(`• [${title}](${chunk.web.uri})`);
+            }
+          }
+          if (links.length > 0) {
+            const uniqueLinks = Array.from(new Set(links)).slice(0, 4);
+            text += '\n\n---\n🌐 **Live Online Web Sources Verified:**\n' + uniqueLinks.join('\n');
+          }
+        }
+        return { text };
+      }
+    } catch (searchError) {
+      console.warn(`Gemini search grounding on ${model} failed, attempting standard generation:`, searchError);
+    }
+
+    // Attempt 2: Standard generation without search grounding fallback
     try {
       const response = await ai.models.generateContent({
         model,
@@ -90,10 +130,11 @@ async function callGemini(apiKey: string, query: string, context: UserFitnessCon
         },
       });
 
-      if (response.text && response.text.trim()) {
-        return response.text.trim();
+      if (response.text?.trim()) {
+        return { text: response.text.trim() };
       }
-    } catch {
+    } catch (genError) {
+      console.warn(`Gemini generation on ${model} failed:`, genError);
       continue;
     }
   }
@@ -137,10 +178,13 @@ async function callChatGPT(apiKey: string, query: string, context: UserFitnessCo
 
 export async function generateGyminAIResponse(
   userQuery: string,
-  context: UserFitnessContext
+  context: UserFitnessContext,
+  customApiKey?: string
 ): Promise<AIResponse> {
-  const geminiKey = process.env.GEMINI_API_KEY?.trim();
-  const openAIKey = process.env.OPENAI_API_KEY?.trim();
+  const cleanCustomKey = customApiKey?.trim();
+  const isCustomOpenAI = cleanCustomKey ? cleanCustomKey.startsWith('sk-') : false;
+  const geminiKey = (!isCustomOpenAI && cleanCustomKey ? cleanCustomKey : process.env.GEMINI_API_KEY)?.trim();
+  const openAIKey = (isCustomOpenAI && cleanCustomKey ? cleanCustomKey : process.env.OPENAI_API_KEY)?.trim();
   const preferredProvider = process.env.AI_PROVIDER?.toLowerCase().trim();
 
   // 1. If user explicitly requests OpenAI or only OpenAI key is present
@@ -156,12 +200,12 @@ export async function generateGyminAIResponse(
     }
   }
 
-  // 2. Try Google Gemini
+  // 2. Try Google Gemini with Live Online Web Browsing
   if (geminiKey) {
     try {
-      const text = await callGemini(geminiKey, userQuery, context);
+      const result = await callGemini(geminiKey, userQuery, context);
       const { cardType, cardData } = detectCard(userQuery, context);
-      return { text, cardType, cardData, provider: 'gemini' };
+      return { text: result.text, cardType, cardData, provider: 'gemini' };
     } catch (err) {
       console.warn('Gemini API call failed, attempting fallback:', err);
     }
@@ -178,14 +222,14 @@ export async function generateGyminAIResponse(
     }
   }
 
-  // 4. Zero-config Grounded Analytical Engine Fallback
+  // 4. Zero-config Grounded Analytical Knowledge Engine
   const analytical = generateGroundedAnalyticalResponse(userQuery, context);
   return { ...analytical, provider: 'analytical' };
 }
 
 /**
  * High-precision grounded analytical response engine that directly answers
- * user questions using the real database records and attaches relevant UI cards.
+ * user questions using the real database records and an extensive sports science knowledge base.
  */
 function generateGroundedAnalyticalResponse(
   query: string,
@@ -194,7 +238,7 @@ function generateGroundedAnalyticalResponse(
   const q = query.toLowerCase().trim();
 
   // 1. "What is my workout today?" / Workout query
-  if (q.includes('workout today') || q.includes("today's workout") || (q.includes('what') && q.includes('workout')) || q.includes('train today')) {
+  if (q.includes('workout today') || q.includes("today's workout") || (q.includes('what') && q.includes('workout')) || q.includes('train today') || q.includes('what to do')) {
     const exerciseList = ctx.todayExercises.map((e) => `• **${e.name}** (${e.sets} sets × ${e.reps} reps)`).join('\n');
     return {
       text: `Today on your split you have **${ctx.todayWorkoutName}**! 💪\n\nHere is your lineup for today:\n${exerciseList}\n\nTake 60–90 seconds rest between compound movements and focus on controlled eccentric reps. Ready to crush it? Tap below to launch your live workout tracker!`,
@@ -209,7 +253,7 @@ function generateGroundedAnalyticalResponse(
   }
 
   // 2. "How much protein have I eaten today?" / Protein query
-  if (q.includes('protein') && (q.includes('how much') || q.includes('eaten') || q.includes('logged') || q.includes('have i'))) {
+  if (q.includes('protein') && (q.includes('how much') || q.includes('eaten') || q.includes('logged') || q.includes('have i') || q.includes('consumed'))) {
     if (ctx.todayProtein === 0) {
       return {
         text: `You haven't logged any food today yet. Your target is **${ctx.proteinTarget}g** of protein. Start by logging your breakfast to stay on track!`,
@@ -293,34 +337,86 @@ function generateGroundedAnalyticalResponse(
     };
   }
 
-  // 6. "I missed yesterday's workout. What should I do?"
-  if (q.includes('missed') || q.includes('skipped')) {
+  // 6. Creatine questions
+  if (q.includes('creatine')) {
     return {
-      text: `No worries at all! Consistency is about the long-term trend, not a single day.\n\nHere is what I recommend:\n1. **Do not do two full workouts in one day.** That increases injury risk and fatigue.\n2. Simply pick up with **${ctx.todayWorkoutName}** today as scheduled.\n3. If you want to make up the volume, you can shift your rest day to the weekend.\n\nTake a breath and let's get after today's session! 💪`,
-      cardType: 'WORKOUT_CARD',
-      cardData: {
-        dayName: ctx.todayWorkoutName,
-        exerciseCount: ctx.todayExercises.length,
-        durationMin: 55,
-      },
+      text: `**Everything you need to know about Creatine Monohydrate:**\n\n1. **How it works:** Creatine saturates phosphocreatine stores in muscle cells, regenerating ATP (adenosine triphosphate) rapidly during explosive lifts (squats, bench press, sprints).\n2. **Dosage:** 3–5 grams per day taken consistently. A "loading phase" (20g/day for 5 days) is optional; taking 5g daily reaches full saturation within 3–4 weeks without stomach discomfort.\n3. **Timing:** Timing is secondary to consistency, but post-workout with protein/carbs offers slight absorption benefits.\n4. **Water:** Drink 3.5–4 liters of water daily since creatine pulls intracellular water into muscle cells (improving cell swelling and protein synthesis).`,
     };
   }
 
-  // 7. "I only have dumbbells today. Modify my workout."
-  if (q.includes('dumbbells') || q.includes('dumbbell only') || q.includes('modify')) {
+  // 7. Whey Protein & Protein Powders
+  if (q.includes('whey') || q.includes('isolate') || q.includes('protein powder')) {
     return {
-      text: `Got you covered! Here is an effective Dumbbell-Only substitution for today:\n\n1. **Dumbbell Floor or Bench Press** — 4 sets × 10 reps\n2. **Incline Dumbbell Flyes** — 3 sets × 12 reps\n3. **One-Arm Dumbbell Rows** — 4 sets × 10 reps\n4. **Overhead Dumbbell Tricep Extension** — 3 sets × 12 reps\n5. **Dumbbell Lateral Raises** — 4 sets × 15 reps\n\nFocus on a 3-second lowering tempo to maximize time under tension!`,
-      cardType: 'WORKOUT_CARD',
-      cardData: {
-        dayName: 'Dumbbell Modified Session',
-        exerciseCount: 5,
-        durationMin: 45,
-      },
+      text: `**Whey Protein Guide (Isolate vs Concentrate):**\n\n• **Whey Concentrate (~80% protein):** Great cost-effective option containing minimal lactose and fat with bioactive peptides.\n• **Whey Isolate (90%+ protein):** Processed to filter out virtually all lactose and fat. Ideal if you are lactose-sensitive or on a strict cutting phase.\n• **Optimal Intake:** Target 1.6–2.2g of protein per kg of body weight daily (for your weight of ${ctx.weightKg}kg, that is **${Math.round(ctx.weightKg * 1.8)}–${Math.round(ctx.weightKg * 2.0)}g**).\n• **When to drink:** Within 1–2 hours post-workout or between meals to hit your daily protein goal.`,
     };
   }
 
-  // 8. General fallback response adhering to persona
+  // 8. Soreness / DOMS
+  if (q.includes('sore') || q.includes('doms') || q.includes('stiff') || q.includes('pain after')) {
+    return {
+      text: `**Dealing with Muscle Soreness (DOMS):**\n\nDelayed Onset Muscle Soreness peaks 24–48 hours after training new movements or high eccentric volume.\n\n1. **Can I train when sore?** Yes, if it's general muscular soreness (not joint or tendon pain). Light activity increases blood flow and speeds recovery.\n2. **Best recovery methods:**\n   • 10–15 min light walking or cycling (active recovery)\n   • Hit your protein target (**${ctx.proteinTarget}g**) to rebuild micro-tears\n   • 7–9 hours of deep sleep where Human Growth Hormone (HGH) is released\n   • Adequate hydration (3L+ water)`,
+    };
+  }
+
+  // 9. Deadlift technique / Back pain
+  if (q.includes('deadlift') || (q.includes('back') && q.includes('pain'))) {
+    return {
+      text: `**Safe Deadlift Form & Protecting Your Lower Back:**\n\n1. **The Wedge & Brace:** Before pulling, take a deep belly breath into your diaphragm (Valsalva maneuver) and brace your abs like you're about to take a punch.\n2. **Lats Engaged:** Think of "protecting your armpits" or "bending the bar around your shins". This locks your thoracic spine.\n3. **Bar Path:** Keep the barbell in continuous contact with your shins and thighs. If the bar drifts forward, the lever arm on your lower back increases exponentially.\n4. **Hip Hinge:** Push your hips back rather than squatting down.\n\n*If you feel sharp spinal pain or numbness, stop immediately and consult a sports physical therapist.*`,
+    };
+  }
+
+  // 10. Squat form / Knee pain
+  if (q.includes('squat') || (q.includes('knee') && q.includes('pain'))) {
+    return {
+      text: `**Squat Mechanics & Eliminating Knee Discomfort:**\n\n1. **Foot Position:** Stand with feet shoulder-width apart, toes angled outward 15–30 degrees.\n2. **Knee Tracking:** Force your knees outward to track in the exact same direction as your toes throughout the descent and ascent (prevent knee valgus/caving).\n3. **Rooting:** Grip the floor with your big toe, pinky toe, and heel (the tripod foot).\n4. **Depth:** Aim for hip crease below the top of the patella (parallel) to balance quad and hamstring/glute loads.`,
+    };
+  }
+
+  // 11. Bench Press / Shoulder Pain
+  if (q.includes('bench') && (q.includes('shoulder') || q.includes('chest'))) {
+    return {
+      text: `**Bench Press Form for Maximum Chest Growth & Shoulder Safety:**\n\n1. **Scapular Retraction:** Pinch your shoulder blades together and pull them down into your back pockets before un-racking. Never press with loose, flat shoulders.\n2. **Elbow Angle:** Tuck your elbows to a 45–75 degree angle relative to your torso. Avoid 90-degree "T-pose" flaring which causes shoulder impingement.\n3. **Bar Path:** Touch the bar to your lower sternum/nipple line, then press in a slight backward J-curve toward your eye line.`,
+    };
+  }
+
+  // 12. Bulking vs Cutting
+  if (q.includes('bulk') || q.includes('cut') || q.includes('deficit') || q.includes('lose fat') || q.includes('gain muscle')) {
+    return {
+      text: `**Lean Bulking vs Cutting Principles:**\n\n• **Clean Bulk:** Eat in a modest 250–350 kcal surplus above maintenance. Aim to gain ~0.5–1 kg per month to maximize lean muscle over adipose fat.\n• **Cutting / Fat Loss:** Maintain a 300–500 kcal deficit. Keep protein high (**${ctx.proteinTarget}g**) and lift heavy to preserve existing muscle tissue while burning fat.\n• **Scale Tracking:** Weigh yourself 3–4 mornings per week upon waking up and track the weekly average rather than day-to-day fluctuations.`,
+    };
+  }
+
+  // 13. Pre-workout & Caffeine
+  if (q.includes('pre-workout') || q.includes('preworkout') || q.includes('caffeine')) {
+    return {
+      text: `**Pre-Workout & Caffeine Optimization:**\n\n• **Effective Caffeine Dose:** 3–6 mg per kg bodyweight taken 30–45 minutes pre-training.\n• **Key Ingredients to look for:**\n  - **L-Citrulline (6–8g):** Nitric oxide booster for vasodilation and muscle pumps.\n  - **Beta-Alanine (3.2g):** Buffers lactic acid (causes the harmless tingling sensation).\n• **Sleep Rule:** Avoid stimulants within 6–8 hours of bedtime to protect deep slow-wave sleep and nighttime recovery.`,
+    };
+  }
+
+  // 14. Water & Hydration
+  if (q.includes('water') || q.includes('hydration') || q.includes('drink')) {
+    return {
+      text: `**Daily Hydration for Resistance Training:**\n\n• Target **3.5 to 4.5 Liters** of water per day.\n• A 2% drop in body water causes up to a 10–15% drop in lifting strength and muscular endurance.\n• Ensure adequate electrolytes (especially sodium and potassium) around heavy training sessions.`,
+    };
+  }
+
+  // 15. Vegetarian / Indian Protein Sources
+  if (q.includes('veg') || q.includes('vegetarian') || q.includes('vegan') || q.includes('paneer') || q.includes('soya')) {
+    return {
+      text: `**Top High-Protein Vegetarian & Indian Foods:**\n\n1. **Soya Chunks:** ~52g protein per 100g (one of the highest protein densities in existence).\n2. **Paneer / Cottage Cheese:** ~18g protein per 100g + healthy fats.\n3. **Greek Yogurt / Hung Curd:** ~10g protein per 100g.\n4. **Lentils / Dal + Rice combo:** Complete amino acid profile when eaten together.\n5. **Chickpeas (Chana) & Rajma:** Great sources of complex carbohydrates, fiber, and ~19g protein per cup.\n6. **Whey Protein:** The cleanest way to close any remaining protein gap.`,
+    };
+  }
+
+  // 16. Rest Days & Frequency
+  if (q.includes('rest day') || q.includes('recovery') || q.includes('frequency')) {
+    return {
+      text: `**Rest Days & Muscular Hypertrophy:**\n\n• Muscle protein synthesis remains elevated for 24–48 hours post-workout. Muscles grow while resting, eating, and sleeping—not in the gym.\n• Aim for **1 to 2 rest days per week** so your Central Nervous System (CNS) and tendons recover.\n• On rest days, maintain your protein target (**${ctx.proteinTarget}g**) and do light walking (8k–10k steps) for active recovery.`,
+    };
+  }
+
+  // 17. General Intelligent Fallback
   return {
-    text: `Hey ${ctx.userName}! As your GYMIN fitness companion, I'm here to support your **${ctx.goal.replace(/_/g, ' ').toLowerCase()}** journey.\n\nToday you have **${ctx.todayWorkoutName}** scheduled and you've logged **${ctx.todayCalories} / ${ctx.calorieTarget} kcal** (${ctx.todayProtein}g protein).\n\nAsk me anytime about:\n• "What is my workout today?"\n• "How much protein have I eaten today?"\n• "What should I eat for dinner?"\n• "Show me my progress"`,
+    text: `Great question, ${ctx.userName}! Here is the scientific coaching guidance on **${query.replace(/^[a-z]/, (c) => c.toUpperCase())}**:\n\n1. **Training Volume & Progressive Overload:** Ensure every muscle group receives 10–20 working sets per week, training within 1–3 reps of failure (RPE 7–9).\n2. **Nutritional Fuel:** Maintain your daily budget of **${ctx.calorieTarget} kcal** and **${ctx.proteinTarget}g protein** to provide amino acids for muscle tissue repair.\n3. **Recovery & Sleep:** Target 7–9 hours of sleep nightly to allow optimal hormone release and central nervous system replenishment.\n\n*Tip: Connect your Google Gemini API key to activate live real-time Google Search online browsing for deep research on any fitness topic!*`,
   };
 }
+

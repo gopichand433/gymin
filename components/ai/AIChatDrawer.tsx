@@ -13,6 +13,10 @@ import {
   Loader2,
   ChevronRight,
   Flame,
+  KeyRound,
+  Globe,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -23,25 +27,89 @@ interface ChatMessage {
   cardData?: any;
 }
 
+function renderFormattedMessage(content: string) {
+  const lines = content.split('\n');
+  return lines.map((line, lIdx) => {
+    if (line.trim() === '---') {
+      return <hr key={lIdx} className="my-2.5 border-neutral-800" />;
+    }
+
+    const parts: (string | JSX.Element)[] = [];
+    const regex = /(\[.*?\]\(https?:\/\/[^\s)]+\)|\*\*.*?\*\*)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(line)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(line.substring(lastIndex, match.index));
+      }
+      const token = match[0];
+      if (token.startsWith('[') && token.includes('](')) {
+        const title = token.substring(1, token.indexOf(']('));
+        const url = token.substring(token.indexOf('](') + 2, token.length - 1);
+        parts.push(
+          <a
+            key={`${lIdx}-${match.index}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-400 hover:text-amber-300 underline font-semibold inline-flex items-center gap-1 mx-0.5"
+          >
+            <span>{title}</span>
+            <ExternalLink className="w-2.5 h-2.5 inline" />
+          </a>
+        );
+      } else if (token.startsWith('**') && token.endsWith('**')) {
+        parts.push(
+          <strong key={`${lIdx}-${match.index}`} className="font-bold text-white">
+            {token.slice(2, -2)}
+          </strong>
+        );
+      }
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < line.length) {
+      parts.push(line.substring(lastIndex));
+    }
+
+    return (
+      <span key={lIdx} className="block min-h-[1.15em]">
+        {parts.length > 0 ? parts : line}
+      </span>
+    );
+  });
+}
+
 export default function AIChatDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [provider, setProvider] = useState<'gemini' | 'openai' | 'analytical'>('analytical');
+  const [customApiKey, setCustomApiKey] = useState('');
+  const [showKeySettings, setShowKeySettings] = useState(false);
+  const [keySavedNotice, setKeySavedNotice] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedPrompts = [
+    'Is creatine safe for daily use?',
+    'Best workout split for hypertrophy?',
     "What's my workout today?",
-    "How much protein have I eaten today?",
-    "What should I eat for dinner?",
-    "Analyze my progress",
-    "I missed yesterday's workout. What should I do?",
-    "I only have dumbbells today. Modify my workout.",
+    'How much protein have I eaten today?',
+    'What should I eat for dinner?',
+    'Why do my knees ache during squats?',
   ];
 
-  // Load chat history on mount
+  // Load chat history & stored API key on mount
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedKey = localStorage.getItem('gymin_custom_ai_key');
+      if (savedKey) {
+        setCustomApiKey(savedKey);
+      }
+    }
+
     fetch('/api/ai/chat')
       .then((res) => res.json())
       .then((data) => {
@@ -55,7 +123,7 @@ export default function AIChatDrawer() {
             {
               role: 'assistant',
               content:
-                "Hey! 👋 I'm **Gymin AI**, your personal fitness coach. I have full context of your workout split, today's meals, steps, and PRs. How can I help you today?",
+                "Hey! 👋 I'm **GYMIN AI**, your personal fitness coach powered by real-time online web browsing & athlete logs.\n\nAsk me any fitness doubts, workout techniques, supplement studies, or today's nutrition!",
               cardType: 'WORKOUT_CARD',
               cardData: {
                 dayName: 'Chest & Triceps',
@@ -76,6 +144,25 @@ export default function AIChatDrawer() {
     }
   }, [messages, isOpen]);
 
+  const handleSaveKey = () => {
+    if (typeof window !== 'undefined') {
+      if (customApiKey.trim()) {
+        localStorage.setItem('gymin_custom_ai_key', customApiKey.trim());
+      } else {
+        localStorage.removeItem('gymin_custom_ai_key');
+      }
+      setKeySavedNotice(true);
+      setTimeout(() => setKeySavedNotice(false), 2500);
+    }
+  };
+
+  const handleClearKey = () => {
+    setCustomApiKey('');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('gymin_custom_ai_key');
+    }
+  };
+
   const handleSendMessage = async (textToSend?: string) => {
     const text = textToSend || inputValue;
     if (!text.trim() || loading) return;
@@ -86,10 +173,17 @@ export default function AIChatDrawer() {
     setLoading(true);
 
     try {
+      const activeKey =
+        customApiKey.trim() ||
+        (typeof window !== 'undefined' ? localStorage.getItem('gymin_custom_ai_key') : null);
+
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text.trim() }),
+        body: JSON.stringify({
+          message: text.trim(),
+          customApiKey: activeKey || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -108,13 +202,16 @@ export default function AIChatDrawer() {
         ...prev,
         {
           role: 'assistant',
-          content: "Sorry, I encountered an issue accessing your fitness context. Please try again in a moment.",
+          content: "Sorry, I encountered an issue communicating with the AI service. Please verify your connection or API key and try again.",
         },
       ]);
     } finally {
       setLoading(false);
     }
   };
+
+  const isBrowsingActive =
+    provider === 'gemini' || (customApiKey.trim() && !customApiKey.startsWith('sk-'));
 
   return (
     <>
@@ -126,7 +223,10 @@ export default function AIChatDrawer() {
         <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
           <Bot className="w-4 h-4 text-black" />
         </div>
-        <span>Ask Gymin AI</span>
+        <span>Ask GYMIN AI</span>
+        {isBrowsingActive && (
+          <span className="w-2 h-2 rounded-full bg-emerald-950 border border-emerald-400 animate-pulse" />
+        )}
       </button>
 
       {/* Slide-out Drawer */}
@@ -142,13 +242,13 @@ export default function AIChatDrawer() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-extrabold text-sm text-white">GYMIN AI</h3>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400/20 text-amber-400 flex items-center gap-1">
-                      {provider === 'gemini' ? (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400/20 text-amber-400 flex items-center gap-1 border border-amber-400/30">
+                      {isBrowsingActive ? (
                         <>
-                          <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                          <span>Gemini 2.5 Flash</span>
+                          <Globe className="w-2.5 h-2.5 text-amber-400 animate-pulse" />
+                          <span>Gemini Live Search</span>
                         </>
-                      ) : provider === 'openai' ? (
+                      ) : provider === 'openai' || customApiKey.startsWith('sk-') ? (
                         <>
                           <span>🤖 ChatGPT</span>
                         </>
@@ -160,18 +260,91 @@ export default function AIChatDrawer() {
                     </span>
                   </div>
                   <p className="text-[11px] text-neutral-400">
-                    Personal trainer & nutrition companion
+                    Online browsing trainer & nutrition expert
                   </p>
                 </div>
               </div>
 
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setShowKeySettings(!showKeySettings)}
+                  className={`p-2 rounded-xl text-xs transition-all flex items-center gap-1.5 ${
+                    customApiKey.trim()
+                      ? 'bg-amber-400/15 border border-amber-400/40 text-amber-300'
+                      : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                  }`}
+                  title="Configure Gemini or OpenAI API Key"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  <span className="text-[10px] font-bold hidden sm:inline">
+                    {customApiKey.trim() ? 'Key Active' : 'Set Key'}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
+
+            {/* Optional Collapsible Key Settings Panel */}
+            {showKeySettings && (
+              <div className="p-3.5 bg-neutral-950 border-b border-amber-500/20 text-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-400">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Gemini Live Online Browsing</span>
+                  </div>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-amber-400/90 hover:text-amber-300 underline flex items-center gap-1"
+                  >
+                    <span>Get Free Gemini Key</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+                <p className="text-[11px] text-neutral-400 leading-normal">
+                  Connect your Google Gemini API key to activate{' '}
+                  <strong className="text-white">real-time Google Search browsing</strong> so GYMIN
+                  AI answers any doubt with verified scientific articles and citations.
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder="Paste Gemini (AIzaSy...) or OpenAI key"
+                    className="flex-1 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs focus:border-amber-400 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleSaveKey}
+                    className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-extrabold text-xs hover:from-amber-300 hover:to-yellow-400 transition-all flex items-center gap-1"
+                  >
+                    {keySavedNotice ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Saved</span>
+                      </>
+                    ) : (
+                      <span>Save</span>
+                    )}
+                  </button>
+                  {customApiKey && (
+                    <button
+                      onClick={handleClearKey}
+                      className="px-2.5 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white text-xs transition-colors"
+                      title="Clear saved key"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Message Feed */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -184,10 +357,10 @@ export default function AIChatDrawer() {
                     className={`max-w-[88%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                       msg.role === 'user'
                         ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-semibold rounded-tr-sm shadow-md shadow-amber-500/15'
-                        : 'bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-tl-sm whitespace-pre-wrap'
+                        : 'bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-tl-sm'
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === 'user' ? msg.content : renderFormattedMessage(msg.content)}
                   </div>
 
                   {/* Render Structured Interactive Cards */}
@@ -266,7 +439,11 @@ export default function AIChatDrawer() {
               {loading && (
                 <div className="flex items-center gap-2 text-xs text-neutral-400 p-2">
                   <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                  <span>Consulting your fitness records...</span>
+                  <span>
+                    {isBrowsingActive
+                      ? 'Browsing live online research & analyzing fitness context...'
+                      : 'Consulting your fitness records & science database...'}
+                  </span>
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -301,7 +478,7 @@ export default function AIChatDrawer() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask about workouts, nutrition, PRs..."
+                  placeholder="Ask about workouts, nutrition, supplements, injuries..."
                   className="flex-1 px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 text-xs sm:text-sm focus:border-amber-400 transition-colors"
                 />
                 <button
@@ -312,8 +489,10 @@ export default function AIChatDrawer() {
                   <Send className="w-4 h-4" />
                 </button>
               </form>
-              <p className="mt-2 text-[10px] text-slate-500 text-center">
-                Answers grounded in your actual workout & nutrition logs.
+              <p className="mt-2 text-[10px] text-neutral-500 text-center flex items-center justify-center gap-1.5">
+                <span>Real-time Google search grounding</span>
+                <span>•</span>
+                <span>Athletic logs</span>
               </p>
             </div>
           </div>

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { message } = body;
+    const { message, customApiKey } = body;
 
     if (!message || typeof message !== 'string' || message.trim() === '') {
       return NextResponse.json({ error: 'Message cannot be empty.' }, { status: 400 });
@@ -22,7 +22,11 @@ export async function POST(request: Request) {
     const context = await getUserFitnessContext(session.userId);
 
     // 2. Generate grounded response
-    const aiResponse = await generateGyminAIResponse(message, context);
+    const aiResponse = await generateGyminAIResponse(
+      message,
+      context,
+      typeof customApiKey === 'string' ? customApiKey : undefined
+    );
 
     // 3. Persist to database
     let conversation = await prisma.aIConversation.findFirst({
